@@ -3,75 +3,78 @@ import { Sprout, Mail, Phone, MapPin } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Link } from "react-router-dom";
 
-
 const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-gray-800 text-white">
+    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           
-          {/* Logo & Description */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="bg-green-600 p-2 rounded-lg">
-                <Sprout className="h-6 w-6 text-white" />
+          {/* Logo & Info */}
+          <div className="col-span-1 md:col-span-2 space-y-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="bg-emerald-600 p-2 rounded-lg text-white">
+                <Sprout className="h-5 w-5" />
               </div>
-              <span className="text-xl font-bold">KeralaFarm AI</span>
+              <span className="text-xl font-bold text-white tracking-tight">
+                Krishi Sakhi <span className="text-emerald-400 font-semibold text-sm">Kerala</span>
+              </span>
             </div>
 
-            <p className="text-gray-300 mb-4 max-w-md">
+            <p className="text-slate-400 text-sm leading-relaxed max-w-md">
               {t("footerDescription")}
             </p>
 
-            <div className="flex space-x-4">
-              <div className="flex items-center space-x-2 text-gray-300">
-                <MapPin className="h-4 w-4" />
-                <span className="text-sm">{t("locationKerala")}</span>
-              </div>
+            <div className="flex items-center space-x-2 text-slate-400 text-xs pt-1">
+              <MapPin className="h-4 w-4 text-emerald-400" />
+              <span>{t("locationKerala")}</span>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">{t("quickLinks")}</h3>
-            <ul className="space-y-2">
+            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">
+              {t("quickLinks")}
+            </h3>
+            <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-gray-300 hover:text-green-400 transition-colors">
+                <Link to="/" className="text-slate-400 hover:text-emerald-400 transition-colors">
                   {t('about')}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-green-400 transition-colors">
+                <Link to="/crop-calender" className="text-slate-400 hover:text-emerald-400 transition-colors">
                   {t("cropCalendar")}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-green-400 transition-colors">
+                <Link to="/dashboard" className="text-slate-400 hover:text-emerald-400 transition-colors">
                   {t("weatherAlerts")}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-green-400 transition-colors">
+                <Link to="/market-trends" className="text-slate-400 hover:text-emerald-400 transition-colors">
                   {t("marketUpdates")}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">{t('contact')}</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center space-x-2 text-gray-300">
-                <Mail className="h-4 w-4" />
-                <span className="text-sm">support@keralafarm.ai</span>
+            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3">
+              {t('contact')}
+            </h3>
+            <ul className="space-y-2.5 text-sm">
+              <li className="flex items-center space-x-2 text-slate-400">
+                <Mail className="h-4 w-4 text-emerald-400" />
+                <span>support@keralafarm.ai</span>
               </li>
-              <li className="flex items-center space-x-2 text-gray-300">
-                <Phone className="h-4 w-4" />
-                <span className="text-sm">+91 9876543210</span>
+              <li className="flex items-center space-x-2 text-slate-400">
+                <Phone className="h-4 w-4 text-emerald-400" />
+                <span>+91 9876543210</span>
               </li>
             </ul>
           </div>
@@ -79,16 +82,14 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            © 2025 KeralaFarm AI. {t("allRightsReserved")}
-          </p>
+        <div className="border-t border-slate-800 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-slate-400">
+          <p>© 2025 Krishi Sakhi. {t("allRightsReserved")}</p>
 
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-gray-400 hover:text-green-400 transition-colors text-sm">
+          <div className="flex space-x-6 mt-3 md:mt-0">
+            <a href="#" className="hover:text-emerald-400 transition-colors">
               {t('privacy')}
             </a>
-            <a href="#" className="text-gray-400 hover:text-green-400 transition-colors text-sm">
+            <a href="#" className="hover:text-emerald-400 transition-colors">
               {t('terms')}
             </a>
           </div>

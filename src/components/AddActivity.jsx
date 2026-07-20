@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { postJSON } from "../api";
 import { toast } from "react-toastify";
 import { useLanguage } from "../contexts/LanguageContext";
+import { Plus } from "lucide-react";
+import { Button } from "./ui/Button";
 
 export default function AddActivity() {
   const defaultform = { type: "", date: "", note: "" };
@@ -28,31 +30,22 @@ export default function AddActivity() {
     <form
       onSubmit={handleSubmit}
       onChange={onChange}
-      className="
-        w-full max-w-5xl mx-auto
-        bg-white/90 border border-green-100 shadow-sm
-        rounded-2xl md:rounded-full
-        px-4 py-3
-        flex flex-col gap-3
-        md:flex-row md:items-center md:gap-3
-      "
+      className="w-full max-w-4xl mx-auto bg-white border border-slate-200/90 shadow-sm rounded-2xl p-3 flex flex-col md:flex-row md:items-center gap-2.5 text-xs"
     >
-      {/* Label + icon */}
-      <div className="flex items-center gap-2">
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-100 text-green-700 text-sm">
-          +
+      <div className="flex items-center gap-2 pl-2">
+        <span className="h-6 w-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+          <Plus className="h-3.5 w-3.5" />
         </span>
-        <span className="text-xs font-semibold text-gray-800">
+        <span className="font-bold text-slate-800 whitespace-nowrap">
           {t("Log activity")}
         </span>
       </div>
 
-      {/* Type */}
       <div className="flex-1 w-full">
         <select
           name="type"
           value={form.type}
-          className="w-full rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-[11px] focus:outline-none focus:ring-1 focus:ring-green-200"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-600 focus:bg-white transition-all cursor-pointer"
         >
           <option value="">{t("Type")}</option>
           <option value="irrigation">{t("Irrigation")}</option>
@@ -68,35 +61,27 @@ export default function AddActivity() {
         </select>
       </div>
 
-      {/* Date */}
-      <div className="w-full md:w-32">
+      <div className="w-full md:w-36">
         <input
           name="date"
           type="date"
           value={form.date}
-          className="w-full rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-[11px] focus:outline-none focus:ring-1 focus:ring-green-200"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-600 focus:bg-white transition-all"
         />
       </div>
 
-      {/* Note */}
       <div className="flex-1 w-full">
         <input
           name="note"
           value={form.note}
           placeholder={t("NotePlaceholder")}
-          className="w-full rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-[11px] focus:outline-none focus:ring-1 focus:ring-green-200"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-600 focus:bg-white transition-all"
         />
       </div>
 
-      {/* Button */}
-      <div className="w-full md:w-auto">
-        <button
-          type="submit"
-          className="w-full md:w-20 rounded-full bg-green-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-green-700 transition-colors"
-        >
-          {t("Save")}
-        </button>
-      </div>
+      <Button type="submit" size="sm" className="w-full md:w-auto px-5">
+        {t("Save")}
+      </Button>
     </form>
   );
 }

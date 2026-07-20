@@ -115,7 +115,7 @@ const UpdateNgoProfile = () => {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch("http://localhost:5000/api/ngo/update", {
+            const res = await fetch("https://krishi-backend-1-e2vy.onrender.com/api/ngo/update", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,

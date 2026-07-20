@@ -1,9 +1,11 @@
-// Chatbot.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Square, Sparkles } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { getBotResponse } from "../lib/actions/chatbot";
 import AudioRecorder from "../components/AudioRecorder";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import { Button } from "../components/ui/Button";
 
 const Chatbot = () => {
   const { t, language } = useLanguage();
@@ -47,7 +49,6 @@ const Chatbot = () => {
     "Organic fertilizer recommendations",
   ];
 
-  // Scroll to latest message
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -58,7 +59,6 @@ const Chatbot = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Audio play / stop
   const playBotAudio = (base64audio) => {
     try {
       if (!base64audio) return;
@@ -110,7 +110,6 @@ const Chatbot = () => {
       const botText = await getBotResponse(content);
       let botResponseData;
       try {
-        // If your API already returns { answer, templateId, steps, audioBase64 }
         botResponseData = botText;
       } catch {
         botResponseData = { answer: botText, templateId: 1, steps: [] };
@@ -151,279 +150,111 @@ const Chatbot = () => {
     handleSend();
   };
 
-  const startNewConversation = () => {
-    setMessages([
-      {
-        id: "1",
-        text:
-          language === "en"
-            ? "New chat started. Tell me about your field or question."
-            : "പുതിയ സംഭാഷണം ആരംഭിച്ചു. നിങ്ങളുടെ വയലിനെക്കുറിച്ചോ സംശയത്തെക്കുറിച്ചോ പറയൂ.",
-        sender: "bot",
-        timestamp: new Date(),
-        templateId: 1,
-        answer:
-          language === "en"
-            ? "New chat started. Tell me about your field or question."
-            : "പുതിയ സംഭാഷണം ആരംഭിച്ചു. നിങ്ങളുടെ വയലിനെക്കുറിച്ചോ സംശയത്തെക്കുറിച്ചോ പറയൂ.",
-        steps: [],
-      },
-    ]);
-    setInput("");
-    setHasAskedQuestion(false);
-  };
-
   return (
-    <div className="min-h-screen bg-emerald-50 text-slate-900 flex">
-      {/* Sidebar */}
-      <aside className="w-64 flex flex-col bg-emerald-50/90 border-r border-emerald-100">
-        <div className="px-4 pt-5 pb-2">
-          <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">
-            Krishi Sakhi
-          </p>
-          <p className="text-[11px] text-emerald-600">
-            Personal farming assistant
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <PageHeader
+          badge="Agri Intelligence"
+          badgeIcon={Sparkles}
+          title="Krishi Sakhi Knowledge Engine"
+          subtitle="Direct conversational access to localized crop recommendations, weather alerts, and pest advisories."
+        />
 
-        <button
-          className="mx-4 my-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 text-sm shadow-sm"
-          onClick={startNewConversation}
-        >
-          <span className="text-lg leading-none">＋</span>
-          <span>New conversation</span>
-        </button>
-
-        <div className="px-4 mt-3 text-[11px] font-semibold text-emerald-700 uppercase tracking-wide">
-          Recent sessions
-        </div>
-
-        {/* simple static list for now */}
-        <nav className="mt-1 flex-1 overflow-y-auto text-sm space-y-1 px-2 pb-4">
-          {suggestions.map((item) => (
-            <button
-              key={item}
-              className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-emerald-100/80 text-emerald-900 text-xs"
-              onClick={() => handleSend(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </nav>
-
-        <div className="px-4 py-4 mt-auto bg-transparent">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold text-white">
-              KS
+        <Card className="mb-6">
+          <CardHeader className="bg-slate-900 text-white">
+            <div className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-emerald-400" />
+              <CardTitle className="text-white text-base">Conversational Assistant Console</CardTitle>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold text-emerald-900">
-                Console
-              </span>
-              <span className="text-[11px] text-emerald-600">
-                Kerala pilot · 2025
-              </span>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 flex flex-col bg-gradient-to-br from-emerald-50 via-white to-emerald-100">
-        <section className="flex-1 flex flex-col w-full max-w-5xl mx-auto px-6 py-6 space-y-6">
-          {/* Hero */}
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <p className="text-xs font-medium text-emerald-700 tracking-wide uppercase">
-              AI-powered farming companion
-            </p>
-            <h1 className="text-4xl md:text-5xl font-semibold text-emerald-900 leading-tight">
-              Walk with every farmer through the entire crop cycle.
-            </h1>
-            <p className="text-sm md:text-base text-emerald-800">
-              Krishi Sakhi gives Kerala’s smallholder farmers timely, field‑level
-              guidance by combining their own records with local weather, pest,
-              and scheme data.
-            </p>
-          </div>
-
-          {/* Suggestions row */}
-          <div className="w-full max-w-3xl mx-auto space-y-3">
-            <p className="text-sm text-emerald-800">
-              Use these prompts to get started:
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {suggestions.map((text) => (
-                <button
-                  key={text}
-                  type="button"
-                  onClick={() => handleSend(text)}
-                  className="flex items-start gap-3 px-3 py-3 rounded-2xl bg-white/80 hover:bg-emerald-50 border border-emerald-100 text-left shadow-sm"
-                >
-                  <div className="mt-0.5 w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-xs text-emerald-600">
-                    ✦
-                  </div>
-                  <span className="text-[13px] text-emerald-900 leading-snug">
-                    {text}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Chat window */}
-          <div className="w-full max-w-3xl mx-auto border border-emerald-100 rounded-2xl bg-white/80 p-3 text-sm max-h-80 overflow-y-auto">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`mb-2 flex ${
-                  msg.sender === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+          </CardHeader>
+          <CardContent className="p-4 space-y-4">
+            
+            {/* Messages */}
+            <div className="space-y-3 max-h-[400px] overflow-y-auto p-2">
+              {messages.map((msg) => (
                 <div
-                  className={`flex items-start space-x-2 max-w-[80%] ${
-                    msg.sender === "user"
-                      ? "flex-row-reverse space-x-reverse"
-                      : ""
-                  }`}
+                  key={msg.id}
+                  className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div
-                    className={`p-2 rounded-full ${
-                      msg.sender === "user" ? "bg-green-600" : "bg-blue-600"
-                    }`}
-                  >
-                    {msg.sender === "user" ? (
-                      <User className="h-4 w-4 text-white" />
-                    ) : (
-                      <Bot className="h-4 w-4 text-white" />
-                    )}
-                  </div>
+                  <div className={`flex items-start gap-2.5 max-w-[85%] ${msg.sender === "user" ? "flex-row-reverse" : ""}`}>
+                    <div className={`p-2 rounded-xl text-white shadow-xs shrink-0 ${msg.sender === "user" ? "bg-emerald-600" : "bg-slate-800"}`}>
+                      {msg.sender === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                    </div>
 
-                  <div
-                    className={`p-2 rounded-lg text-xs ${
-                      msg.sender === "user"
-                        ? "bg-green-600 text-white"
-                        : "bg-gray-100 text-gray-900"
-                    }`}
-                  >
-                    {msg.sender === "bot" && msg.templateId === 2 ? (
-                      <div>
-                        <p>{msg.answer}</p>
-                        <ol className="list-decimal list-inside mt-1 text-xs text-gray-700">
-                          {msg.steps.map((step, idx) => (
-                            <li key={idx} className="text-black">
-                              {step.replace("**", "")}
-                            </li>
-                          ))}
-                        </ol>
-                      </div>
-                    ) : (
-                      <p>{msg.answer || msg.text}</p>
-                    )}
-                    <p
-                      className={`mt-1 text-[10px] ${
-                        msg.sender === "user"
-                          ? "text-green-100"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      {msg.timestamp.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="flex items-center space-x-2">
-                  <div className="p-2 rounded-full bg-blue-600">
-                    <Bot className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="p-2 rounded-lg bg-gray-100">
-                    <div className="flex space-x-1">
-                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div
-                        className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.1s" }}
-                      ></div>
-                      <div
-                        className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.2s" }}
-                      ></div>
+                    <div className={`p-3.5 rounded-2xl text-xs border ${msg.sender === "user" ? "bg-emerald-600 text-white border-emerald-600 rounded-tr-none" : "bg-slate-50 text-slate-800 border-slate-200/90 rounded-tl-none"}`}>
+                      {msg.sender === "bot" && msg.templateId === 2 ? (
+                        <div>
+                          <p className="font-semibold">{msg.answer}</p>
+                          <ol className="list-decimal list-inside mt-2 space-y-1">
+                            {msg.steps.map((step, idx) => (
+                              <li key={idx}>{step.replace(/\*\*/g, "")}</li>
+                            ))}
+                          </ol>
+                        </div>
+                      ) : (
+                        <p className="leading-relaxed">{msg.answer || msg.text}</p>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              ))}
 
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Quick questions strip */}
-          {!hasAskedQuestion && (
-            <div className="w-full max-w-3xl mx-auto border border-emerald-100 rounded-2xl bg-emerald-50/80 px-3 py-2">
-              <p className="text-[11px] font-medium text-emerald-900 mb-1">
-                Quick questions
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {quickQuestions.map((q, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setInput(q)}
-                    className="px-2 py-1 bg-white border border-emerald-100 rounded-full text-[10px] text-emerald-700 hover:bg-emerald-50"
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-xl bg-slate-800 text-white">
+                      <Bot className="h-4 w-4 animate-spin" />
+                    </div>
+                    <span className="text-xs text-slate-500 font-medium">Generating response...</span>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
-          )}
 
-          {/* Input bar */}
-          <form
-            onSubmit={handleSubmit}
-            className="w-full max-w-3xl mx-auto rounded-2xl bg-white/90 border border-emerald-100 flex items-center px-4 py-2 gap-2 shadow-sm"
-          >
-            <span className="text-lg text-emerald-500">🌾</span>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
-              placeholder={
-                language === "en"
-                  ? "Ask your farming question..."
-                  : "നിങ്ങളുടെ കൃഷി ചോദ്യം ചോദിക്കുക..."
-              }
-              className="flex-1 px-2 py-2 bg-transparent outline-none text-sm text-emerald-900 placeholder:text-emerald-400"
-            />
+            {/* Input Bar */}
+            <form onSubmit={handleSubmit} className="flex gap-2 pt-3 border-t border-slate-100">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask a question..."
+                className="flex-1 px-4 py-2.5 bg-white border border-slate-200/90 rounded-xl text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
+              />
 
-            <AudioRecorder setMessage={setInput} setProcessing={setIsTyping} />
+              <AudioRecorder setMessage={setInput} setProcessing={setIsTyping} />
 
-            {isPlaying && (
-              <button
-                type="button"
-                onClick={stopAudio}
-                className="px-2 py-2 bg-red-500 text-white rounded-lg text-[11px]"
-              >
-                Stop
-              </button>
-            )}
+              {isPlaying && (
+                <button
+                  type="button"
+                  onClick={stopAudio}
+                  className="px-3 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold"
+                >
+                  <Square className="h-3.5 w-3.5" />
+                </button>
+              )}
 
-            <button
-              type="submit"
-              disabled={!input.trim()}
-              className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 flex items-center space-x-1 text-xs"
+              <Button type="submit" disabled={!input.trim()} size="sm">
+                <Send className="h-3.5 w-3.5" />
+                <span>Send</span>
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Suggestions Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {suggestions.map((text, i) => (
+            <div
+              key={i}
+              onClick={() => handleSend(text)}
+              className="p-3 bg-white border border-slate-200/90 rounded-xl hover:border-emerald-300 text-xs text-slate-700 font-medium cursor-pointer transition-colors"
             >
-              <Send className="h-3 w-3" />
-              <span>Send</span>
-            </button>
-          </form>
-        </section>
-      </main>
+              {text}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

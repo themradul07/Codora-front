@@ -19,7 +19,7 @@ const ApplyLoan = () => {
   // ---------------- FETCH NGO DETAILS ---------------- //
   const fetchNgo = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/ngo/${ngoId}`, {
+      const res = await fetch(`https://krishi-backend-1-e2vy.onrender.com/api/ngo/${ngoId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -52,11 +52,11 @@ const ApplyLoan = () => {
     if (Object.keys(newErrors).length > 0) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/loan/apply", {
+      const res = await fetch("https://krishi-backend-1-e2vy.onrender.com/api/loan/apply", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}` 
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           ngoId,
@@ -93,7 +93,7 @@ const ApplyLoan = () => {
 
         {/* NGO LOAN DETAILS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 p-5 bg-gray-100 rounded-xl">
-          
+
           <div className="flex items-center gap-2">
             <FaPercent className="text-green-700 text-xl" />
             <div>

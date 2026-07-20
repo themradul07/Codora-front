@@ -1,37 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Plus, BadgeCheck, Trash2 } from "lucide-react";
-import { postJSON, getJSON, deleteJSON } from "../api";
+import { Plus, BadgeCheck, Trash2, ShieldCheck, Edit, Loader2 } from "lucide-react";
+import { getJSON, deleteJSON } from "../api";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import { Button } from "../components/ui/Button";
+import { Badge } from "../components/ui/Badge";
 
 const AdminDashboard = () => {
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" }); // or "smooth"
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, []);
-  // form modal
-  const [openModal, setOpenModal] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    department: "",
-    state: "",
-    benefits: "",
-  });
 
-  // scheme list
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 9;
 
-  // fetch schemes
   const fetchSchemes = async () => {
     try {
       setLoading(true);
-
       const query = { page, limit };
       const res = await getJSON("/schemes", query);
 
@@ -49,161 +39,126 @@ const AdminDashboard = () => {
     fetchSchemes();
   }, [page]);
 
-  // DELETE SCHEME
   const deleteScheme = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this scheme?"
+      "Are you sure you want to delete this government scheme?"
     );
 
     if (!confirmDelete) return;
 
     try {
       const res = await deleteJSON(`/schemes/${id}`);
-      console.log(res);
       if (res.success) {
-        toast("Scheme deleted successfully!");
-        fetchSchemes(); // refresh list
+        toast.success("Scheme deleted successfully!");
+        fetchSchemes();
       } else {
-        toast("Failed to delete scheme.");
+        toast.error("Failed to delete scheme.");
       }
     } catch (err) {
       console.error(err);
-      toast("Error deleting scheme.");
-    }
-  };
-
-  // ADD SCHEME
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const res = await postJSON("/admin/schemes/add", form);
-
-    if (res.success) {
-      setOpenModal(false);
-      setForm({
-        name: "",
-        description: "",
-        department: "",
-        state: "",
-        benefits: "",
-      });
-      fetchSchemes();
+      toast.error("Error deleting scheme.");
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-green-50">
-      {/* ---------------- SIDEBAR ---------------- */}
-      <aside className="w-64 bg-white shadow-xl p-6 border-r border-green-100">
-        <h1 className="text-2xl font-bold text-green-700 mb-6">Admin Panel</h1>
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        <PageHeader
+          badge="Admin Console"
+          badgeIcon={ShieldCheck}
+          title="Government Scheme Management"
+          subtitle="Publish, modify, or retire official government agricultural welfare programs and subsidies."
+          actions={
+            <Link to="/admin/schemes/add">
+              <Button>
+                <Plus className="h-4 w-4" />
+                <span>Add New Scheme</span>
+              </Button>
+            </Link>
+          }
+        />
 
-        <nav className="space-y-3">
-          <button className="flex items-center gap-2 w-full p-3 rounded-xl hover:bg-green-100 text-left">
-            <BadgeCheck className="w-5 h-5 text-green-700" />
-            <span className="font-medium">Manage Schemes</span>
-          </button>
-
-          <Link
-            to={"/admin/schemes/add"}
-            className="flex items-center gap-2 w-full p-3 rounded-xl hover:bg-green-100 text-left"
-          >
-            <Plus className="w-5 h-5 text-green-700" />
-            <span className="font-medium">Add New Scheme</span>
-          </Link>
-        </nav>
-      </aside>
-
-      {/* ---------------- MAIN CONTENT ---------------- */}
-      <main className="flex-1 p-6 md:p-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl md:text-2xl font-bold text-green-700">
-            Manage Government Schemes
-          </h2>
-          {loading && <span className="text-xs text-gray-500">Loading...</span>}
-        </div>
-
-        {schemes.length === 0 && !loading ? (
-          <p className="text-sm text-gray-500">No schemes found.</p>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 text-slate-400 gap-2">
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+            <span className="text-xs font-semibold">Loading schemes directory...</span>
+          </div>
+        ) : schemes.length === 0 ? (
+          <div className="text-center py-16 text-slate-400">
+            <BadgeCheck className="h-12 w-12 mx-auto mb-2 text-slate-300" />
+            <p className="text-sm font-semibold text-slate-700">No schemes published yet.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {schemes.map((scheme) => (
-              <div
-                key={scheme._id}
-                className="bg-white border border-gray-100 p-5 rounded-xl shadow-sm hover:shadow-md transition relative"
-              >
-                <Link to={`/admin/schemes/${scheme._id}`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <BadgeCheck className="text-green-600" size={18} />
-                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-                      {scheme.name}
-                    </h3>
-                  </div>
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {schemes.map((scheme) => (
+                <Card key={scheme._id} className="flex flex-col justify-between">
+                  <CardContent className="p-6 flex flex-col justify-between h-full">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <BadgeCheck className="text-emerald-600 h-5 w-5 shrink-0" />
+                        <h3 className="font-extrabold text-sm text-slate-900 line-clamp-2">
+                          {scheme.name}
+                        </h3>
+                      </div>
 
-                  <p className="text-sm text-gray-600 mb-1">
-                    <span className="font-semibold">Department:</span>{" "}
-                    {scheme.department}
-                  </p>
+                      <div className="mb-3">
+                        <Badge variant="emerald">{scheme.department || "General"}</Badge>
+                      </div>
 
-                  {scheme.state && (
-                    <p className="text-sm text-gray-600 mb-1">
-                      <span className="font-semibold">State:</span>{" "}
-                      {scheme.state}
-                    </p>
-                  )}
+                      <p className="text-xs text-slate-600 line-clamp-3 mb-4 leading-relaxed">
+                        {scheme.description}
+                      </p>
+                    </div>
 
-                  <p className="text-sm text-gray-700 line-clamp-3">
-                    {scheme.description}
-                  </p>
+                    <div className="space-y-2 pt-2 border-t border-slate-100">
+                      <Link to={`/admin/schemes/${scheme._id}`} className="block">
+                        <Button variant="secondary" className="w-full">
+                          <Edit className="h-3.5 w-3.5" />
+                          <span>Edit Details</span>
+                        </Button>
+                      </Link>
 
-                  {scheme.benefits && (
-                    <p className="text-sm text-green-700 font-medium mt-2">
-                      Benefit: {scheme.benefits}
-                    </p>
-                  )}
+                      <Button
+                        variant="danger"
+                        className="w-full"
+                        onClick={() => deleteScheme(scheme._id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Delete Scheme</span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-                  <button className="mt-4 w-full bg-green-600 text-white py-2 rounded-lg text-sm hover:bg-green-700 transition">
-                    Edit Scheme
-                  </button>
-                </Link>
-
-                {/* DELETE BUTTON */}
-                <button
-                  onClick={() => deleteScheme(scheme._id)}
-                  className="mt-3 w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2 rounded-lg text-sm hover:bg-red-700 transition"
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 mt-8">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
                 >
-                  <Trash2 size={16} />
-                  Delete Scheme
-                </button>
+                  Prev
+                </Button>
+                <span className="text-xs font-bold text-slate-700">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  Next
+                </Button>
               </div>
-            ))}
+            )}
           </div>
         )}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-4 mt-6 text-sm">
-            <button
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-              className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40"
-            >
-              Prev
-            </button>
-
-            <span className="text-gray-700">
-              Page {page} of {totalPages}
-            </span>
-
-            <button
-              disabled={page === totalPages}
-              onClick={() => setPage(page + 1)}
-              className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        )}
-      </main>
+      </div>
     </div>
   );
 };

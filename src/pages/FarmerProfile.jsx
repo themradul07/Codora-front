@@ -2,14 +2,8 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { getJSON } from "../api";
 import { Link } from "react-router-dom";
-
-// lucide icons
 import {
   User,
-  LayoutDashboard,
-  Bell,
-  Layers,
-  PlusCircle,
   MapPin,
   Leaf,
   Mountain,
@@ -17,36 +11,28 @@ import {
   Mail,
   Phone,
   Globe,
-  LogOut,
+  Edit,
+  Building2
 } from "lucide-react";
-
 import { useLanguage } from "../contexts/LanguageContext";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import { Button } from "../components/ui/Button";
+import { Badge } from "../components/ui/Badge";
 
-/* ---------------- LOCATION RENDER FUNCTION ---------------- */
 function renderLocation(location, t) {
   if (!location) return t("locationNotAdded");
-
-  // If backend sends object
   if (typeof location === "object") {
-    return (
-      <>
-        <span className="font-semibold">{location.district}</span> <br />
-        Lat: {location.latitude} <br />
-        Lng: {location.longitude}
-      </>
-    );
+    return `${location.district || ""}, Lat: ${location.latitude || ""}, Lng: ${location.longitude || ""}`;
   }
-
-  // If it's a string
   return location;
 }
 
 export default function FarmerProfile() {
   const { t } = useLanguage();
-  const [lang, setLang] = useState("en-IN");
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" }); // or "smooth"
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, []);
 
   const defaultProfile = {
@@ -78,131 +64,155 @@ export default function FarmerProfile() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* ---------------- RIGHT MAIN PANEL ---------------- */}
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-        <h1 className="text-3xl font-bold text-gray-800">{t("profileSettings")}</h1>
-        <p className="text-gray-500 mt-1">{t("profileManage")}</p>
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+        <PageHeader
+          badge="Account Settings"
+          badgeIcon={User}
+          title={t("profileSettings")}
+          subtitle={t("profileManage")}
+          actions={
+            <Link to="/update-profile">
+              <Button>
+                <Edit className="h-4 w-4" />
+                <span>{t("editProfile")}</span>
+              </Button>
+            </Link>
+          }
+        />
 
-        {/* MAIN GRID LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-          {/* LEFT COLUMN */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Profile Card */}
-            <div className="bg-white shadow rounded-2xl p-6 border">
-              <div className="flex flex-col items-center text-center">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left Column: Avatar & Contact */}
+          <div className="space-y-6">
+            <Card>
+              <CardContent className="pt-6 flex flex-col items-center text-center">
                 <img
                   src={
                     profile.profileImage ||
                     "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                   }
-                  className="w-28 h-28 rounded-full border-4 border-green-500 object-cover shadow"
+                  className="w-24 h-24 rounded-full border-4 border-emerald-500 object-cover shadow-sm mb-4"
                   alt={profile.name || t("farmerNamePlaceholder")}
                 />
-                <h2 className="mt-4 text-xl font-bold text-gray-800">
+                <h2 className="text-lg font-extrabold text-slate-900">
                   {profile.name || t("farmerNamePlaceholder")}
                 </h2>
+                <Badge variant="emerald" className="mt-1 mb-3">Registered Farmer</Badge>
 
-                <p className="text-gray-600 flex items-center gap-2 mt-1">
-                  <MapPin size={16} className="text-green-600" />
+                <p className="text-xs text-slate-500 flex items-center gap-1">
+                  <MapPin size={14} className="text-emerald-600 shrink-0" />
                   <span>{renderLocation(profile.location, t)}</span>
                 </p>
+              </CardContent>
+            </Card>
 
-                <Link
-                  to="/update-profile"
-                  className="mt-4 bg-green-600 text-white px-5 py-2 rounded-xl hover:bg-green-700"
-                >
-                  {t("editProfile")}
-                </Link>
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("contact")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-3 text-xs">
+                  <div className="p-2 bg-slate-100 rounded-xl text-emerald-700">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase">{t("email")}</span>
+                    <p className="font-semibold text-slate-900">{profile.email || "—"}</p>
+                  </div>
+                </div>
 
-            {/* Contact Card */}
-            <div className="bg-white shadow rounded-2xl p-6 border space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">{t("contact")}</h3>
-
-              <Row icon={<Mail />} label="email" value={profile.email} />
-              <Row icon={<Phone />} label="phone" value={profile.phone} />
-            </div>
+                <div className="flex items-center gap-3 text-xs">
+                  <div className="p-2 bg-slate-100 rounded-xl text-emerald-700">
+                    <Phone className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase">{t("phone")}</span>
+                    <p className="font-semibold text-slate-900">{profile.phone || "—"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* RIGHT COLUMN */}
+          {/* Right Column: Farm Details */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Farm Info */}
-            <div className="bg-white shadow rounded-2xl p-6 border">
-              <h3 className="text-xl font-semibold mb-4 text-gray-800">{t("farmDetails")}</h3>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("farmDetails")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-3">
+                    <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl">
+                      <Leaf className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">{t("primaryCrop")}</span>
+                      <p className="text-sm font-bold text-slate-900">{profile.primaryCrop || "—"}</p>
+                    </div>
+                  </div>
 
-              <div className="grid sm:grid-cols-2 gap-6">
-                <Detail label="primaryCrop" value={profile.primaryCrop} icon={<Leaf />} />
-                <Detail
-                  label="landSize"
-                  value={profile.landSize ? `${profile.landSize} ${t("acres")}` : "—"}
-                  icon={<Mountain />}
-                />
-                <Detail label="soilType" value={profile.soilType} icon={<Mountain />} />
-                <Detail label="irrigation" value={profile.irrigation} icon={<Droplets />} />
-              </div>
-            </div>
+                  <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-3">
+                    <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl">
+                      <Mountain className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">{t("landSize")}</span>
+                      <p className="text-sm font-bold text-slate-900">
+                        {profile.landSize ? `${profile.landSize} ${t("acres")}` : "—"}
+                      </p>
+                    </div>
+                  </div>
 
-            {/* Address Section */}
-            <div className="bg-white shadow rounded-2xl p-6 border">
-              <h3 className="text-xl font-semibold mb-4 text-gray-800">{t("address")}</h3>
+                  <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-3">
+                    <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl">
+                      <Mountain className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">{t("soilType")}</span>
+                      <p className="text-sm font-bold text-slate-900">{profile.soilType || "—"}</p>
+                    </div>
+                  </div>
 
-              <p className="text-gray-600">{renderLocation(profile.location, t)}</p>
-            </div>
+                  <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-3">
+                    <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl">
+                      <Droplets className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">{t("irrigation")}</span>
+                      <p className="text-sm font-bold text-slate-900">{profile.irrigation || "—"}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* Account Settings */}
-            <div className="bg-white shadow rounded-2xl p-6 border">
-              <h3 className="text-xl font-semibold mb-4 text-gray-800">{t("accountSettings")}</h3>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("accountSettings")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs">
+                  <span className="font-bold text-slate-700 flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-emerald-600" />
+                    <span>Language Preference</span>
+                  </span>
+                  <Badge variant="slate">{t("englishIndia")}</Badge>
+                </div>
 
-              <div className="space-y-3">
-                <SettingRow label="language" value={t("englishIndia")} icon={<Globe />} />
-                <SettingRow label="accountType" value={t("farmer")} icon={<User />} />
-              </div>
-            </div>
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs">
+                  <span className="font-bold text-slate-700 flex items-center gap-2">
+                    <User className="h-4 w-4 text-emerald-600" />
+                    <span>Account Category</span>
+                  </span>
+                  <Badge variant="emerald">{t("farmer")}</Badge>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
         </div>
-      </main>
-    </div>
-  );
-}
-
-/* ---------------- REUSABLE COMPONENTS ---------------- */
-
-function Row({ icon, label, value }) {
-  const { t } = useLanguage();
-  return (
-    <div className="flex items-center gap-3 text-gray-700">
-      <div className="p-2 bg-gray-100 rounded-xl text-green-700">{icon}</div>
-      <div>
-        <p className="text-xs text-gray-500">{t(label)}</p>
-        <p className="font-semibold">{value || "—"}</p>
-      </div>
-    </div>
-  );
-}
-
-function Detail({ icon, label, value }) {
-  const { t } = useLanguage();
-  return (
-    <div className="flex items-center gap-4 bg-gray-50 border p-4 rounded-xl">
-      <div className="p-2 bg-green-100 rounded-xl text-green-700">{icon}</div>
-      <div>
-        <p className="text-gray-500 text-sm">{t(label)}</p>
-        <p className="text-lg font-semibold text-gray-800">{value || "—"}</p>
-      </div>
-    </div>
-  );
-}
-
-function SettingRow({ icon, label, value }) {
-  const { t } = useLanguage();
-  return (
-    <div className="flex items-center gap-4 border-b pb-3">
-      <div className="text-green-700">{icon}</div>
-      <div>
-        <p className="font-semibold text-gray-700">{t(label)}</p>
-        <p className="text-gray-500">{value}</p>
       </div>
     </div>
   );

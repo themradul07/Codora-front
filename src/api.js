@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_API_BASE
   ? import.meta.env.VITE_API_BASE
-  : "http://localhost:5000/api";
+  : "https://krishi-backend-1-e2vy.onrender.com/api";
 
 // POST JSON
 // export async function postJSON(path, body) {
@@ -178,7 +178,7 @@ export async function getJSON(path, query = {}) {
  */
 export async function deleteJSON(path, params) {
   const token = await localStorage.getItem("token");
-  
+
 
   try {
     const res = await axios.delete(
@@ -187,7 +187,7 @@ export async function deleteJSON(path, params) {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
-        params:{
+        params: {
           ...params
         }
 

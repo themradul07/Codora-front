@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { FaSearch, FaRupeeSign, FaPercent, FaClock } from "react-icons/fa";
+import { Search, IndianRupee, Percent, Clock, Landmark, Loader2 } from "lucide-react";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
+import { Button } from "../components/ui/Button";
+import { Badge } from "../components/ui/Badge";
+import { Modal } from "../components/ui/Modal";
 
 const AllNgos = () => {
   const [ngos, setNgos] = useState([]);
@@ -15,21 +21,17 @@ const AllNgos = () => {
 
   const token = localStorage.getItem("token");
 
-  // --------------------- FETCH NGOs --------------------- //
   const fetchNgos = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/loan/all", {
+      const res = await fetch("https://krishi-backend-1-e2vy.onrender.com/api/loan/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
-      console.log("NGOs fetched:", data);
-
       if (data.success) {
         setNgos(data.loans);
         setFilteredNgos(data.loans);
       }
-
       setLoading(false);
     } catch (err) {
       console.error("Error fetching NGOs:", err);
@@ -41,23 +43,19 @@ const AllNgos = () => {
     fetchNgos();
   }, []);
 
-  // --------------------- SEARCH FILTER --------------------- //
   useEffect(() => {
     let filtered = ngos;
-
     if (searchText.trim() !== "") {
       filtered = filtered.filter(
         (ngo) =>
           ngo.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          ngo.description.toLowerCase().includes(searchText.toLowerCase()) ||
-          ngo.address.toLowerCase().includes(searchText.toLowerCase())
+          ngo.description?.toLowerCase().includes(searchText.toLowerCase()) ||
+          ngo.address?.toLowerCase().includes(searchText.toLowerCase())
       );
     }
-
     setFilteredNgos(filtered);
   }, [searchText, ngos]);
 
-  // --------------------- OPEN MODAL --------------------- //
   const openLoanModal = (ngo) => {
     setSelectedNgo(ngo);
     setLoanAmount("");
@@ -66,7 +64,6 @@ const AllNgos = () => {
     setModalOpen(true);
   };
 
-  // --------------------- APPLY LOAN --------------------- //
   const submitLoan = async () => {
     const newErrors = {};
 
@@ -83,7 +80,7 @@ const AllNgos = () => {
     if (Object.keys(newErrors).length > 0) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/loan/apply", {
+      const res = await fetch("https://krishi-backend-1-e2vy.onrender.com/api/loan/apply", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,144 +108,139 @@ const AllNgos = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        <PageHeader
+          badge="Agri Finance"
+          badgeIcon={Landmark}
+          title="Microfinance & NGO Agricultural Loans"
+          subtitle="Apply directly for low-interest micro-loans from verified agricultural NGOs and SHG cooperatives."
+        />
 
-      {/* HEADER */}
-      <div className="max-w-7xl mx-auto mb-6">
-        <h1 className="text-3xl font-extrabold text-gray-800">NGOs Offering Loans</h1>
-        <p className="text-gray-500 mt-1">Choose an NGO to apply for a loan</p>
-      </div>
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="max-w-md">
+              <Input
+                type="text"
+                placeholder="Search NGO or financial provider..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                icon={Search}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-      <div className="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow border border-green-100">
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Loan Programs ({filteredNgos.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-2">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+                <span className="text-xs font-semibold">Loading NGO programs...</span>
+              </div>
+            ) : filteredNgos.length === 0 ? (
+              <div className="text-center py-12 text-slate-400">
+                <Landmark className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+                <p className="text-xs font-semibold">No NGO loan schemes found matching criteria.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                      <th className="pb-3 px-2">Organization</th>
+                      <th className="pb-3 px-2">Contact</th>
+                      <th className="pb-3 px-2">Criteria</th>
+                      <th className="pb-3 px-2">Interest Rate</th>
+                      <th className="pb-3 px-2">Max Loan</th>
+                      <th className="pb-3 px-2">Processing Time</th>
+                      <th className="pb-3 px-2 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredNgos.map((ngo) => (
+                      <tr key={ngo._id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3 px-2 font-extrabold text-slate-900">{ngo.name}</td>
+                        <td className="py-3 px-2 text-slate-600">
+                          <p className="font-semibold">{ngo.phone}</p>
+                          <p className="text-[11px] text-slate-400">{ngo.email}</p>
+                        </td>
+                        <td className="py-3 px-2 text-slate-600 font-medium max-w-xs">{ngo.loanCriteria}</td>
+                        <td className="py-3 px-2">
+                          <Badge variant="emerald">{ngo.interestRate}% P.A.</Badge>
+                        </td>
+                        <td className="py-3 px-2 font-bold text-slate-900">
+                          ₹{Number(ngo.maxLoan).toLocaleString('en-IN')}
+                        </td>
+                        <td className="py-3 px-2 text-slate-600">
+                          <span className="flex items-center gap-1 font-medium">
+                            <Clock className="h-3.5 w-3.5 text-slate-400" /> {ngo.processingTime} Days
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-right">
+                          <Button size="sm" onClick={() => openLoanModal(ngo)}>
+                            Apply Now
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        {/* SEARCH BAR */}
-        <div className="flex items-center bg-gray-100 px-3 py-2 rounded-lg w-full md:w-1/3 mb-6">
-          <FaSearch className="text-gray-500 mr-2" />
-          <input
-            type="text"
-            placeholder="Search NGO..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="bg-transparent outline-none w-full"
-          />
-        </div>
-
-        {/* NGO TABLE */}
-        {loading ? (
-          <p className="text-center py-4 text-gray-600">Loading NGOs...</p>
-        ) : filteredNgos.length === 0 ? (
-          <p className="text-center py-4 text-gray-600">No NGOs found.</p>
-        ) : (
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b text-gray-600">
-                <th className="pb-3">NGO</th>
-                <th className="pb-3">Contact</th>
-                <th className="pb-3">Criteria</th>
-                <th className="pb-3">Interest</th>
-                <th className="pb-3">Max Loan</th>
-                <th className="pb-3">Processing</th>
-                <th className="pb-3">Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredNgos.map((ngo) => (
-                <tr key={ngo._id} className="border-b last:border-none">
-
-                  <td className="py-3 font-semibold">{ngo.name}</td>
-
-                  <td className="py-3">
-                    <p>{ngo.phone}</p>
-                    <p className="text-sm text-gray-500">{ngo.email}</p>
-                  </td>
-
-                  <td className="py-3 text-sm">{ngo.loanCriteria}</td>
-
-                  <td className="py-3 flex items-center gap-1 text-green-700 font-bold">
-                    <FaPercent /> {ngo.interestRate}%
-                  </td>
-
-                  <td className="py-3 flex items-center gap-1">
-                    <FaRupeeSign /> {ngo.maxLoan}
-                  </td>
-
-                  <td className="py-3 flex items-center gap-1">
-                    <FaClock /> {ngo.processingTime} days
-                  </td>
-
-                  <td className="py-3">
-                    <button
-                      onClick={() => openLoanModal(ngo)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-                    >
-                      Apply
-                    </button>
-                  </td>
-
-                </tr>
-              ))}
-            </tbody>
-
-          </table>
-        )}
-
-      </div>
-
-      {/* ---------------- MODAL ---------------- */}
-      {modalOpen && selectedNgo && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
-          <div className="bg-white p-6 rounded-xl shadow-xl max-w-md w-full">
-
-            <h2 className="text-xl font-bold text-gray-800">
-              Apply for Loan - {selectedNgo.name}
-            </h2>
-
-            <div className="mt-4">
-              <label className="text-sm font-medium text-gray-600">Amount (₹)</label>
-              <input
+        {/* Modal */}
+        <Modal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          title={`Apply for Loan - ${selectedNgo?.name}`}
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                Requested Loan Amount (Max ₹{selectedNgo?.maxLoan?.toLocaleString('en-IN')}) *
+              </label>
+              <Input
                 type="number"
-                className="w-full p-3 border rounded-lg mt-1 bg-gray-50"
                 value={loanAmount}
                 onChange={(e) => setLoanAmount(e.target.value)}
+                placeholder="e.g. 50000"
+                icon={IndianRupee}
               />
-              {errors.amount && (
-                <p className="text-red-600 text-sm mt-1">{errors.amount}</p>
-              )}
+              {errors.amount && <p className="text-xs text-rose-600 mt-1 font-semibold">{errors.amount}</p>}
             </div>
 
-            <div className="mt-4">
-              <label className="text-sm font-medium text-gray-600">Purpose</label>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                Loan Purpose / Usage Plan *
+              </label>
               <textarea
                 rows="3"
-                className="w-full p-3 border rounded-lg mt-1 bg-gray-50"
+                className="w-full border border-slate-200/90 rounded-xl p-3 text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-slate-900"
                 value={loanPurpose}
                 onChange={(e) => setLoanPurpose(e.target.value)}
+                placeholder="Describe seeds, fertilizer, equipment purchase or land preparation plan..."
               />
-              {errors.purpose && (
-                <p className="text-red-600 text-sm mt-1">{errors.purpose}</p>
-              )}
+              {errors.purpose && <p className="text-xs text-rose-600 mt-1 font-semibold">{errors.purpose}</p>}
             </div>
 
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
-              >
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <Button variant="secondary" onClick={() => setModalOpen(false)}>
                 Cancel
-              </button>
-
-              <button
-                onClick={submitLoan}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg"
-              >
-                Submit Application
-              </button>
+              </Button>
+              <Button onClick={submitLoan}>
+                Submit Loan Application
+              </Button>
             </div>
-
           </div>
-        </div>
-      )}
+        </Modal>
+
+      </div>
     </div>
   );
 };

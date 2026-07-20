@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Search, UploadCloud, CheckCircle, AlertCircle } from 'lucide-react';
+import { Search, CheckCircle2, AlertTriangle, ShieldCheck, FlaskConical } from 'lucide-react';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
 
 export default function PesticideRestrictionChecker() {
-  const bgUrl = '/farm-bg.jpg';
-
   const [query, setQuery] = useState('');
-  const [fileName, setFileName] = useState('');
   const [result, setResult] = useState(null);
   const [showAll, setShowAll] = useState(false);
-  const [allPesticides, setAllPesticides] = useState([]);   // FIXED
+  const [allPesticides, setAllPesticides] = useState([]);
 
-  const suggestions = []; // You can add later
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
 
-
-    useEffect(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    }, []);
-  // 👉 Load all pesticides from backend
   useEffect(() => {
     async function loadAll() {
       try {
-        const res = await fetch("http://localhost:5000/api/pesticides");
+        const res = await fetch("https://krishi-backend-1-e2vy.onrender.com/api/pesticides");
         const data = await res.json();
         setAllPesticides(data);
       } catch (err) {
@@ -30,20 +29,19 @@ export default function PesticideRestrictionChecker() {
     loadAll();
   }, []);
 
-  // 👉 Fetch single pesticide by name
   async function lookupPesticideAPI(name) {
     if (!name) return null;
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/pesticides/${encodeURIComponent(name)}`
+        `https://krishi-backend-1-e2vy.onrender.com/api/pesticides/${encodeURIComponent(name)}`
       );
 
       if (!res.ok) {
         return {
           name,
           status: "Unknown",
-          alternatives: ["Not found in database"]
+          alternatives: ["Not found in government restriction registry"]
         };
       }
 
@@ -52,7 +50,7 @@ export default function PesticideRestrictionChecker() {
       return {
         name,
         status: "Error",
-        alternatives: ["Server not responding"]
+        alternatives: ["Server connection failed"]
       };
     }
   }
@@ -65,124 +63,129 @@ export default function PesticideRestrictionChecker() {
 
   function StatusBadge({ status }) {
     if (!status) return null;
-
     const s = status.toLowerCase();
     if (s === 'banned')
-      return <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-900/60 text-red-300 text-sm"><AlertCircle size={16}/> BANNED</span>;
+      return <Badge variant="rose"><AlertTriangle className="h-3.5 w-3.5 mr-1" /> BANNED</Badge>;
     if (s === 'restricted')
-      return <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-900/50 text-yellow-300 text-sm"><AlertCircle size={16}/> RESTRICTED</span>;
+      return <Badge variant="amber"><AlertTriangle className="h-3.5 w-3.5 mr-1" /> RESTRICTED</Badge>;
     if (s === 'allowed')
-      return <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-900/50 text-green-300 text-sm"><CheckCircle size={16}/> ALLOWED</span>;
+      return <Badge variant="emerald"><CheckCircle2 className="h-3.5 w-3.5 mr-1" /> ALLOWED</Badge>;
 
-    return <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/40 text-slate-200 text-sm">{status.toUpperCase()}</span>;
+    return <Badge variant="slate">{status.toUpperCase()}</Badge>;
   }
 
   return (
-   
-     <div
-  className="min-h-screen bg-cover bg-center bg-no-repeat py-8 relative"
-  style={{
-    backgroundImage:
-      "url('https://cdn.pixabay.com/photo/2021/09/18/02/27/vietnam-6634082_1280.jpg')",
-  }}
->
-  {/* Soft overlay for readability */}
-  <div className="absolute inset-0 bg-white/50 backdrop-blur-[3px]"></div>
-  <div className="relative max-w-4xl mx-auto px-2">
-    
-    <div className="min-h-screen" 
-         style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-    >
-      <div className="backdrop-brightness-50 bg-[rgba(2,48,33,0.62)] min-h-screen p-6 ">
-        <div className="max-w-6xl mx-auto text-center text-white py-12">
-          <h1 className="text-3xl font-extrabold">Pesticide Restriction Checker</h1>
-          <p className="mt-2 text-slate-200 max-w-2xl mx-auto">
-            Scan or type a pesticide name to check whether it's allowed, restricted, or banned in Kerala.
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <PageHeader
+          badge="Chemical Compliance Engine"
+          badgeIcon={ShieldCheck}
+          title="Pesticide Restriction Checker"
+          subtitle="Search any chemical or pesticide compound to verify whether it is permitted, restricted, or banned under Kerala Agricultural regulations."
+        />
 
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* SEARCH FORM */}
-          <form onSubmit={handleSearch} className="md:col-span-2 bg-[#072d23]/60 p-6 rounded-2xl shadow-lg">
-            <label className="block text-sm text-slate-200 mb-2">Search pesticide</label>
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <input
-                  value={query}
-                  onChange={(e) => { setQuery(e.target.value); setResult(null); }}
-                  placeholder="Type pesticide name"
-                  className="w-full rounded-lg px-4 py-3 bg-[#062b22]/40 border border-slate-700 placeholder-slate-300 text-white"
-                />
-                <button type="submit"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-md flex items-center gap-2">
-                  <Search size={16}/>
-                  <span className="text-sm">Check</span>
-                </button>
-              </div>
-            </div>
-          </form>
-
-          {/* RESULT + SHOW ALL */}
-          <div className="bg-[#072d23]/60 p-6 rounded-2xl shadow-lg flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Result</h3>
-              <button onClick={() => setShowAll(s => !s)}
-                      className="px-3 py-2 rounded bg-slate-800/40 text-sm text-slate-200">
-                {showAll ? "Hide list" : "Show list"}
-              </button>
-            </div>
-
-            {/* RESULT DISPLAY */}
-            {!result && (
-              <div className="text-slate-300">No result yet.</div>
-            )}
-
-            {result && (
-              <div className="mt-2 bg-[#062e27]/40 p-4 rounded-lg border border-slate-700">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h4 className="text-xl font-bold">{result.name}</h4>
-                    <StatusBadge status={result.status}/>
+          {/* Search Card */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Search Chemical Database</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSearch} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Pesticide Trade Name / Compound
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={query}
+                      onChange={(e) => { setQuery(e.target.value); setResult(null); }}
+                      placeholder="e.g. Endosulfan, Malathion, Neem Oil"
+                      icon={Search}
+                    />
+                    <Button type="submit" className="shrink-0">
+                      Check Status
+                    </Button>
                   </div>
                 </div>
+              </form>
+            </CardContent>
+          </Card>
 
-                <div className="mt-4">
-                  <h5 className="font-semibold text-slate-200">Safer alternatives</h5>
-                  <ul className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {result.alternatives?.map((alt, i) => (
-                      <li key={i} className="text-sm text-slate-300 bg-slate-800/20 px-3 py-2 rounded">{alt}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-
-            {/* SHOW ALL LIST — DYNAMIC */}
-            {showAll && (
-              <div className="mt-4">
-                <h5 className="text-slate-200 font-semibold mb-2">All Pesticides</h5>
-
-                <ul className="space-y-2 max-h-48 overflow-auto">
-                  {allPesticides.length === 0 && (
-                    <li className="text-slate-300 text-sm">Loading...</li>
-                  )}
-
-                  {allPesticides.map((p) => (
-                    <li key={p._id} className="flex items-center justify-between bg-slate-800/20 px-3 py-2 rounded">
-                      <div className="text-sm text-slate-200">{p.name}</div>
-                      <div className="text-sm text-slate-300">{p.status}</div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+          {/* Quick List Action */}
+          <Card className="flex flex-col justify-between">
+            <CardHeader>
+              <CardTitle>Database Registry</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-slate-500 mb-4">
+                View all regulated chemical compounds listed in the Kerala State Agricultural Database.
+              </p>
+              <Button
+                variant="secondary"
+                onClick={() => setShowAll((s) => !s)}
+                className="w-full"
+              >
+                {showAll ? "Hide Registry" : "View Full Registry"}
+              </Button>
+            </CardContent>
+          </Card>
 
         </div>
+
+        {/* Result Display */}
+        {result && (
+          <Card className="mt-6 border-emerald-200">
+            <CardHeader className="bg-slate-50/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl">{result.name}</CardTitle>
+                  <div className="mt-1">
+                    <StatusBadge status={result.status} />
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                Recommended Organic / Approved Alternatives
+              </h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {result.alternatives?.map((alt, i) => (
+                  <div key={i} className="text-xs font-medium text-slate-800 bg-slate-100 p-2.5 rounded-xl border border-slate-200/80">
+                    {alt}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Full Registry Modal / Drawer List */}
+        {showAll && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Regulated Chemical Compounds ({allPesticides.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                {allPesticides.length === 0 ? (
+                  <p className="text-xs text-slate-400">Loading chemical registry...</p>
+                ) : (
+                  allPesticides.map((p) => (
+                    <div key={p._id} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs font-medium">
+                      <span className="text-slate-900 font-bold">{p.name}</span>
+                      <StatusBadge status={p.status} />
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
       </div>
-    </div>
-    </div>
     </div>
   );
 }

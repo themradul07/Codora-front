@@ -3,14 +3,19 @@ import {
   Upload as UploadIcon,
   Camera,
   FileImage,
-  Loader,
+  Loader2,
   AlertTriangle,
-  CheckCircle,
+  CheckCircle2,
   XCircle,
+  FlaskConical
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { isAuthenticated } from "../lib/actions/authActions";
 import { useNavigate } from "react-router-dom";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import { Button } from "../components/ui/Button";
+import { Badge } from "../components/ui/Badge";
 
 const DetectPesticide = () => {
   const navigate = useNavigate();
@@ -53,7 +58,7 @@ const DetectPesticide = () => {
       formData.append("image", selectedFile);
 
       const response = await fetch(
-        "http://localhost:5000/api/advisory/detect-pesticide",
+        "https://krishi-backend-1-e2vy.onrender.com/api/advisory/detect-pesticide",
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -72,162 +77,147 @@ const DetectPesticide = () => {
     }
   };
 
-  // Badge colors for Allowed / Restricted / Banned
-  const statusBadge = (status) => {
+  const renderStatusBadge = (status) => {
     if (status === "Allowed")
-      return "bg-green-100 text-green-700 border-green-300";
+      return <Badge variant="emerald"><CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Allowed</Badge>;
     if (status === "Restricted")
-      return "bg-yellow-100 text-yellow-700 border-yellow-300";
+      return <Badge variant="amber"><AlertTriangle className="h-3.5 w-3.5 mr-1" /> Restricted</Badge>;
     if (status === "Banned")
-      return "bg-red-100 text-red-700 border-red-300";
-    return "bg-gray-100 text-gray-700 border-gray-300";
-  };
-
-  const statusIcon = (status) => {
-    if (status === "Allowed") return <CheckCircle className="h-6 w-6 text-green-600" />;
-    if (status === "Restricted") return <AlertTriangle className="h-6 w-6 text-yellow-600" />;
-    if (status === "Banned") return <XCircle className="h-6 w-6 text-red-600" />;
-    return <AlertTriangle className="h-6 w-6 text-gray-500" />;
+      return <Badge variant="rose"><XCircle className="h-3.5 w-3.5 mr-1" /> Banned</Badge>;
+    return <Badge variant="slate">{status}</Badge>;
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
+        <PageHeader
+          badge="Chemical Scanner"
+          badgeIcon={FlaskConical}
+          title="Pesticide Detection"
+          subtitle="Upload a photo of a pesticide bottle or chemical label to detect active ingredients and verify government regulations."
+        />
 
-        {/* Heading */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Pesticide Detection</h1>
-          <p className="text-gray-600 text-lg">
-            Upload a pesticide bottle or label image to check if it is allowed, restricted, or banned.
-          </p>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-          {/* LEFT: UPLOAD */}
-          <div className="bg-white shadow-lg rounded-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">Upload Pesticide Image</h2>
-
-            {!previewUrl ? (
-              <div
-                className="border-2 border-dashed border-gray-300 p-6 rounded-lg text-center cursor-pointer hover:border-green-500"
-                onClick={() => fileRef.current?.click()}
-              >
-                <UploadIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="font-medium text-gray-700">Drop or Choose Image</p>
-                <p className="text-sm text-gray-500">Supports JPG, PNG</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="relative w-full bg-gray-100 rounded-lg overflow-hidden">
-                  <img src={previewUrl} alt="preview" className="w-full object-contain max-h-80" />
-                  <button
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full px-2 py-1"
-                    onClick={() => {
-                      setPreviewUrl(null);
-                      setSelectedFile(null);
-                      setResult(null);
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <button
-                  onClick={analyze}
-                  disabled={isAnalyzing}
-                  className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+          {/* Upload Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload Pesticide Image</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!previewUrl ? (
+                <div
+                  className="border-2 border-dashed border-emerald-300 p-8 rounded-xl text-center cursor-pointer bg-emerald-50/30 hover:bg-emerald-50/60 transition-colors flex flex-col items-center justify-center min-h-[220px]"
+                  onClick={() => fileRef.current?.click()}
                 >
-                  {isAnalyzing ? (
-                    <>
-                      <Loader className="h-5 w-5 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Camera className="h-5 w-5" />
-                      Analyze Image
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-
-            <input
-              type="file"
-              ref={fileRef}
-              className="hidden"
-              accept="image/*"
-              onChange={(e) => handleFile(e.target.files[0])}
-            />
-          </div>
-
-          {/* RIGHT: RESULT */}
-          <div className="bg-white shadow-lg rounded-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">Analysis Result</h2>
-
-            {!result && !isAnalyzing && (
-              <div className="text-center text-gray-500 py-10">
-                <FileImage className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                No analysis yet
-              </div>
-            )}
-
-            {isAnalyzing && (
-              <div className="text-center py-10">
-                <Loader className="h-16 w-16 mx-auto mb-4 animate-spin text-green-600" />
-                <p className="text-gray-600">Analyzing pesticide image...</p>
-              </div>
-            )}
-
-            {result && (
-              <div className="space-y-5">
-
-                {/* Name */}
-                <div className="border-b pb-3">
-                  <h3 className="text-lg font-bold text-gray-800">{result.name}</h3>
-
-                  {/* Status badge */}
-                  <div
-                    className={`inline-flex items-center gap-2 px-3 py-1 mt-2 rounded-full text-sm border ${statusBadge(
-                      result.status
-                    )}`}
-                  >
-                    {statusIcon(result.status)}
-                    <span>{result.status}</span>
+                  <UploadIcon className="h-10 w-10 text-emerald-600 mb-3" />
+                  <p className="font-bold text-sm text-slate-800 mb-1">Upload Label or Bottle Photo</p>
+                  <p className="text-xs text-slate-500 mb-3">Supports JPG, PNG (Max 10MB)</p>
+                  <Button size="sm" variant="secondary">Choose File</Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="relative w-full bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
+                    <img src={previewUrl} alt="preview" className="w-full object-contain max-h-72" />
+                    <button
+                      className="absolute top-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold"
+                      onClick={() => {
+                        setPreviewUrl(null);
+                        setSelectedFile(null);
+                        setResult(null);
+                      }}
+                    >
+                      ×
+                    </button>
                   </div>
-                </div>
 
-                {/* Active Ingredient */}
-                <div>
-                  <p className="text-sm text-gray-500">Active Ingredient</p>
-                  <p className="font-medium text-gray-800">
-                    {result.activeIngredient || "Unknown"}
-                  </p>
+                  <Button
+                    onClick={analyze}
+                    disabled={isAnalyzing}
+                    className="w-full"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Analyzing Chemical...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="h-4 w-4" />
+                        <span>Analyze Pesticide</span>
+                      </>
+                    )}
+                  </Button>
                 </div>
+              )}
 
-                {/* Category */}
-                <div>
-                  <p className="text-sm text-gray-500">Category</p>
-                  <p className="font-medium text-gray-800">
-                    {result.category || "Unknown"}
-                  </p>
+              <input
+                type="file"
+                ref={fileRef}
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => handleFile(e.target.files[0])}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Result Card */}
+          <Card className="min-h-[340px]">
+            <CardHeader>
+              <CardTitle>Analysis Diagnostic Report</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!result && !isAnalyzing && (
+                <div className="text-center text-slate-400 py-12">
+                  <FileImage className="h-12 w-12 mx-auto mb-2 text-slate-300" />
+                  <p className="text-xs font-medium">Upload sample to view status</p>
                 </div>
+              )}
 
-                {/* Confidence */}
-                <div>
-                  <p className="text-sm text-gray-500">Detection Confidence</p>
-                  <p className="font-medium text-gray-800">{result.confidence}%</p>
+              {isAnalyzing && (
+                <div className="text-center py-12">
+                  <Loader2 className="h-10 w-10 mx-auto mb-3 animate-spin text-emerald-600" />
+                  <p className="text-xs font-semibold text-slate-700">Identifying chemical compound...</p>
                 </div>
+              )}
 
-                {/* Reason */}
-                <div className="bg-gray-50 p-3 rounded-lg border">
-                  <p className="text-sm text-gray-700">{result.reason}</p>
+              {result && (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="pb-3 border-b border-slate-100">
+                    <h3 className="text-lg font-extrabold text-slate-900">{result.name}</h3>
+                    <div className="mt-2">
+                      {renderStatusBadge(result.status)}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Ingredient</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {result.activeIngredient || "Unknown"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Chemical Category</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {result.category || "Unknown"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Detection Confidence</p>
+                    <p className="text-sm font-bold text-emerald-700">{result.confidence}%</p>
+                  </div>
+
+                  {result.reason && (
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-xs text-slate-700">
+                      {result.reason}
+                    </div>
+                  )}
                 </div>
-
-              </div>
-            )}
-          </div>
+              )}
+            </CardContent>
+          </Card>
 
         </div>
       </div>

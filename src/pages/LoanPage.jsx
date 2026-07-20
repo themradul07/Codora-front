@@ -12,7 +12,7 @@ const LoanRequests = () => {
   // --------------------- FETCH LOAN REQUESTS --------------------- //
   const fetchLoans = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/ngo/requests", {
+      const res = await fetch("https://krishi-backend-1-e2vy.onrender.com/api/ngo/requests", {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -40,7 +40,7 @@ const LoanRequests = () => {
   // --------------------- UPDATE STATUS (APPROVE) --------------------- //
   const approveLoan = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/loan/approve/${id}`, {
+      const res = await fetch(`https://krishi-backend-1-e2vy.onrender.com/api/loan/approve/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,7 +62,7 @@ const LoanRequests = () => {
   // --------------------- UPDATE STATUS (DECLINE) --------------------- //
   const declineLoan = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/loan/decline/${id}`, {
+      const res = await fetch(`https://krishi-backend-1-e2vy.onrender.com/api/loan/decline/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -150,11 +150,10 @@ const LoanRequests = () => {
                         <button
                           onClick={() => approveLoan(req._id)}
                           disabled={req.status !== "pending"}
-                          className={`px-4 py-2 rounded-lg text-white font-semibold transition ${
-                            req.status !== "pending"
+                          className={`px-4 py-2 rounded-lg text-white font-semibold transition ${req.status !== "pending"
                               ? "bg-green-300 cursor-not-allowed"
                               : "bg-green-600 hover:bg-green-700"
-                          }`}
+                            }`}
                         >
                           Approve
                         </button>
@@ -162,11 +161,10 @@ const LoanRequests = () => {
                         <button
                           onClick={() => declineLoan(req._id)}
                           disabled={req.status !== "pending"}
-                          className={`px-4 py-2 rounded-lg text-white font-semibold transition ${
-                            req.status !== "pending"
+                          className={`px-4 py-2 rounded-lg text-white font-semibold transition ${req.status !== "pending"
                               ? "bg-red-300 cursor-not-allowed"
                               : "bg-red-600 hover:bg-red-700"
-                          }`}
+                            }`}
                         >
                           Decline
                         </button>

@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const UpdateScheme = () => {
-const {schemeId}=useParams();
+  const { schemeId } = useParams();
   const [scheme, setScheme] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const {schemeId}=useParams();
   useEffect(() => {
     const fetchScheme = async () => {
       try {
-        const data= await getJSON(`/schemes/${schemeId}`);
+        const data = await getJSON(`/schemes/${schemeId}`);
         // const data = await res.json();
         console.log(data);
         setScheme(data.scheme);
@@ -44,13 +44,13 @@ const {schemeId}=useParams();
   const updateScheme = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:5000/api/schemes/${schemeId}`, {
+      const res = await fetch(`https://krishi-backend-1-e2vy.onrender.com/api/schemes/${schemeId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(scheme),
       });
 
-      
+
       toast.success("Scheme updated successfully!");
       navigate("/admin/dashboard");
 
@@ -123,7 +123,7 @@ const {schemeId}=useParams();
           <input
             type="text"
             name="state"
-            value={scheme.eligibility.state??''}
+            value={scheme.eligibility.state ?? ''}
             onChange={handleEligibilityChange}
             className="w-full border border-green-300 rounded-lg p-2 mb-3"
           />

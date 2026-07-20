@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Sprout, Menu, X, Globe } from "lucide-react";
+import { Sprout, Menu, X, Globe, LogOut, LogIn, ChevronRight } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { logout } from "../lib/actions/authActions";
 
@@ -33,67 +33,80 @@ const Navbar = ({ isAuthenticated }) => {
   const LanguageButton = () => (
     <button
       onClick={() => setLanguage(language === "en" ? "ml" : "en")}
-      className="flex items-center space-x-1 px-3 py-2 rounded-md 
-                 text-sm font-medium text-gray-600 hover:text-green-600 
-                 hover:bg-green-50 transition"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                 text-slate-700 bg-slate-100 hover:bg-slate-200 hover:text-emerald-700 
+                 border border-slate-200 transition-colors duration-150 cursor-pointer"
     >
-      <Globe className="h-4 w-4" />
+      <Globe className="h-3.5 w-3.5 text-emerald-600" />
       <span>{language === "en" ? "മലയാളം" : "English"}</span>
     </button>
   );
 
-  const NavLink = ({ item }) => (
-    <Link
-      to={item.path}
-      className={`px-3 py-2 rounded-md text-sm font-medium transition ${
-        isActive(item.path)
-          ? "bg-green-100 text-green-700"
-          : "text-gray-600 hover:text-green-600 hover:bg-green-50"
-      }`}
-    >
-      {item.label}
-    </Link>
-  );
+  const NavLink = ({ item }) => {
+    const active = isActive(item.path);
+    return (
+      <Link
+        to={item.path}
+        className={`px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-150 ${
+          active
+            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+            : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+        }`}
+      >
+        {item.label}
+      </Link>
+    );
+  };
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4">
+    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="bg-green-600 p-2 rounded-lg group-hover:bg-green-700 transition">
-              <Sprout className="h-6 w-6 text-white" />
+          <Link to="/" className="flex items-center space-x-2.5 group">
+            <div className="bg-emerald-600 p-2 rounded-lg text-white shadow-xs group-hover:bg-emerald-700 transition-colors">
+              <Sprout className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold text-gray-800 group-hover:text-green-600 transition">
-              {t("Krishi Sakhi")}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-lg font-bold text-slate-900 tracking-tight leading-none">
+                {t("Krishi Sakhi")}
+              </span>
+              <span className="text-[10px] font-semibold text-emerald-600 tracking-wider uppercase mt-0.5">
+                Kerala Agri Platform
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-6">
-
+          <div className="hidden md:flex items-center space-x-2">
             {navItems
               .filter((item) => item.show)
               .map((item) => (
                 <NavLink key={item.path} item={item} />
               ))}
 
+            <div className="h-4 w-px bg-slate-200 mx-2"></div>
+
             <LanguageButton />
 
             {isAuthenticated ? (
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-green-600 hover:text-green-700 font-medium"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold 
+                           text-rose-600 hover:bg-rose-50 border border-rose-200/80 transition-colors cursor-pointer"
               >
-                {t("Logout")}
+                <LogOut className="h-4 w-4" />
+                <span>{t("Logout")}</span>
               </button>
             ) : (
               <Link
                 to="/twilio-invite"
-                className="px-4 py-2 text-green-600 hover:text-green-700 font-medium"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold text-white
+                           bg-emerald-600 hover:bg-emerald-700 shadow-xs transition-colors"
               >
-                {t("login")}
+                <LogIn className="h-4 w-4" />
+                <span>{t("login")}</span>
               </Link>
             )}
           </div>
@@ -101,7 +114,8 @@ const Navbar = ({ isAuthenticated }) => {
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden p-2 rounded-md text-gray-600 hover:text-green-600 hover:bg-green-50 transition"
+            className="md:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+            aria-label="Toggle navigation menu"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -109,7 +123,7 @@ const Navbar = ({ isAuthenticated }) => {
 
         {/* Mobile Nav */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 pt-3 pb-4 space-y-2">
+          <div className="md:hidden border-t border-slate-100 py-3 space-y-1.5">
             {navItems
               .filter((item) => item.show)
               .map((item) => (
@@ -117,37 +131,40 @@ const Navbar = ({ isAuthenticated }) => {
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition ${
+                  className={`flex items-center justify-between px-3.5 py-2 rounded-lg text-sm font-semibold ${
                     isActive(item.path)
-                      ? "bg-green-100 text-green-700"
-                      : "text-gray-600 hover:text-green-600 hover:bg-green-50"
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                      : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  {item.label}
+                  <span>{item.label}</span>
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
                 </Link>
               ))}
 
-            <LanguageButton />
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between px-2">
+              <LanguageButton />
 
-            {isAuthenticated ? (
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setIsMenuOpen(false);
-                }}
-                className="block w-full text-left px-3 py-2 text-green-600 hover:text-green-700 font-medium"
-              >
-                {t("Logout")}
-              </button>
-            ) : (
-              <Link
-                to="/login"
-                onClick={() => setIsMenuOpen(false)}
-                className="block w-full text-left px-3 py-2 text-green-600 hover:text-green-700 font-medium"
-              >
-                {t("login")}
-              </Link>
-            )}
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200"
+                >
+                  {t("Logout")}
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600"
+                >
+                  {t("login")}
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </div>

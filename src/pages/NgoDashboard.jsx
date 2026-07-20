@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  FaUsers,
-  FaCheckCircle,
-  FaClock,
-  FaChartLine,
-  FaHandHoldingUsd,
-} from "react-icons/fa";
+import { Users, CheckCircle2, Clock, IndianRupee, BarChart3, Loader2 } from "lucide-react";
 import NgoSidebar from "../components/NgoSidebar";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
 
 const NgoDashboard = () => {
   const token = localStorage.getItem("token");
@@ -15,28 +12,22 @@ const NgoDashboard = () => {
   const [recentLoans, setRecentLoans] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ------------------------
-  // FETCH STATS + RECENT LOANS
-  // ------------------------
   const fetchDashboardData = async () => {
     try {
       const [statsRes, recentRes] = await Promise.all([
-        fetch("http://localhost:5000/api/ngo/dashboard/stats", {
+        fetch("https://krishi-backend-1-e2vy.onrender.com/api/ngo/dashboard/stats", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://localhost:5000/api/ngo/dashboard/recent", {
+        fetch("https://krishi-backend-1-e2vy.onrender.com/api/ngo/dashboard/recent", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
 
       const statsData = await statsRes.json();
       const recentData = await recentRes.json();
-      console.log("Dashboard Stats:", statsData);
-        console.log("Recent Loans:", recentData);
 
       if (statsData.success) setStats(statsData.stats);
       if (recentData.success) setRecentLoans(recentData.loans);
-
     } catch (err) {
       console.error("Dashboard Load Error:", err);
     } finally {
@@ -48,131 +39,118 @@ const NgoDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const getStatusColor = (status) => {
-    if (status === "approved") return "text-green-600 bg-green-100";
-    if (status === "pending") return "text-yellow-600 bg-yellow-100";
-    return "text-red-600 bg-red-100";
+  const renderBadge = (status) => {
+    if (status === "approved") return <Badge variant="emerald">Approved</Badge>;
+    if (status === "pending") return <Badge variant="amber">Pending</Badge>;
+    return <Badge variant="rose">Rejected</Badge>;
   };
 
   if (loading || !stats) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-lg">
-        Loading dashboard...
+      <div className="flex items-center justify-center min-h-screen text-xs font-medium text-slate-500 gap-2">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+        Loading NGO console...
       </div>
     );
   }
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen bg-slate-50">
       <NgoSidebar />
-      <div className="flex-1">
-        <div className="min-h-screen bg-gray-50 p-6">
+      <div className="flex-1 p-6 md:p-10">
+        <div className="max-w-6xl mx-auto">
+          <PageHeader
+            badge="NGO Officer Console"
+            badgeIcon={BarChart3}
+            title="NGO Microfinance Dashboard"
+            subtitle="Overview of loan disbursements, active farmer accounts, pending applications, and approval queues."
+          />
 
-          <div className="max-w-7xl mx-auto">
+          {/* Stats Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <Card>
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Disbursed</span>
+                  <p className="text-xl font-black text-slate-900 mt-1">₹{stats.totalDisbursed.toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-xl">
+                  <IndianRupee className="h-6 w-6" />
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* TITLE */}
-            <h1 className="text-3xl font-extrabold text-gray-800 flex items-center gap-2 mb-6">
-              <FaChartLine className="text-green-600" /> NGO Dashboard
-            </h1>
+            <Card>
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Farmers</span>
+                  <p className="text-xl font-black text-slate-900 mt-1">{stats.totalFarmers}</p>
+                </div>
+                <div className="p-3 bg-blue-100 text-blue-700 rounded-xl">
+                  <Users className="h-6 w-6" />
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* STAT CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              
-              <div className="p-6 bg-white rounded-2xl shadow border border-green-100 flex flex-col">
-                <FaHandHoldingUsd className="text-green-600 text-3xl mb-3" />
-                <span className="text-gray-500 text-sm">Total Disbursed</span>
-                <span className="text-xl font-bold text-gray-800">
-                  ₹{stats.totalDisbursed.toLocaleString()}
-                </span>
-              </div>
+            <Card>
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Approved Loans</span>
+                  <p className="text-xl font-black text-slate-900 mt-1">{stats.approved}</p>
+                </div>
+                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-xl">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+              </CardContent>
+            </Card>
 
-              <div className="p-6 bg-white rounded-2xl shadow border border-green-100">
-                <FaUsers className="text-blue-600 text-3xl mb-3" />
-                <span className="text-gray-500 text-sm">Total Farmers</span>
-                <span className="text-xl font-bold text-gray-800">
-                  {stats.totalFarmers}
-                </span>
-              </div>
+            <Card>
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pending Requests</span>
+                  <p className="text-xl font-black text-slate-900 mt-1">{stats.pending}</p>
+                </div>
+                <div className="p-3 bg-amber-100 text-amber-700 rounded-xl">
+                  <Clock className="h-6 w-6" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              <div className="p-6 bg-white rounded-2xl shadow border border-green-100">
-                <FaCheckCircle className="text-green-600 text-3xl mb-3" />
-                <span className="text-gray-500 text-sm">Approved Loans</span>
-                <span className="text-xl font-bold text-gray-800">
-                  {stats.approved}
-                </span>
-              </div>
-
-              <div className="p-6 bg-white rounded-2xl shadow border border-green-100">
-                <FaClock className="text-yellow-500 text-3xl mb-3" />
-                <span className="text-gray-500 text-sm">Pending Requests</span>
-                <span className="text-xl font-bold text-gray-800">
-                  {stats.pending}
-                </span>
-              </div>
-            </div>
-
-            {/* ANALYTICS SECTION */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-
-              {/* RECENT LOAN REQUESTS */}
-              <div className="lg:col-span-2 bg-white rounded-2xl shadow border border-green-100 p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Recent Loan Requests
-                </h2>
-
-                {recentLoans.length === 0 ? (
-                  <p className="text-gray-500 text-center py-6">No loan requests found.</p>
-                ) : (
-                  <table className="w-full text-left">
+          {/* Recent Applications */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Loan Applications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {recentLoans.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center py-6">No recent loan requests found.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="text-gray-600 border-b">
-                        <th className="pb-2">Farmer</th>
-                        <th className="pb-2">Amount</th>
-                        <th className="pb-2">Purpose</th>
-                        <th className="pb-2">Status</th>
+                      <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                        <th className="pb-3 px-2">Farmer</th>
+                        <th className="pb-3 px-2">Requested Amount</th>
+                        <th className="pb-3 px-2">Purpose</th>
+                        <th className="pb-3 px-2 text-right">Status</th>
                       </tr>
                     </thead>
-
-                    <tbody>
+                    <tbody className="divide-y divide-slate-100">
                       {recentLoans.map((loan) => (
-                        <tr key={loan._id} className="border-b last:border-none">
-                          <td className="py-3 font-semibold">{loan.farmerName}</td>
-                          <td className="py-3">₹{loan.amount.toLocaleString()}</td>
-                          <td className="py-3">{loan.purpose}</td>
-                          <td className="py-3">
-                            <span
-                              className={`px-3 py-1 text-xs rounded-full font-semibold ${getStatusColor(
-                                loan.status
-                              )}`}
-                            >
-                              {loan.status}
-                            </span>
-                          </td>
+                        <tr key={loan._id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-3 px-2 font-extrabold text-slate-900">{loan.farmerName}</td>
+                          <td className="py-3 px-2 font-bold text-slate-900">₹{loan.amount.toLocaleString()}</td>
+                          <td className="py-3 px-2 text-slate-600 font-medium">{loan.purpose}</td>
+                          <td className="py-3 px-2 text-right">{renderBadge(loan.status)}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                )}
-
-              </div>
-
-              {/* LOAN TREND (Placeholder Graph) */}
-              <div className="bg-white rounded-2xl shadow border border-green-100 p-6 flex flex-col">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Loan Activity Trend
-                </h2>
-
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500">
-                    <span>Chart Coming Soon</span>
-                  </div>
                 </div>
-              </div>
-
-            </div>
-
-          </div>
-
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

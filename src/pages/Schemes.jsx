@@ -1,57 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, Search, Landmark, ArrowRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import SchemeHeader from "../components/Schemes/Header";
-import SchemeSidebar from "../components/Schemes/Sidebar";
 import { getJSON } from "../api";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
+import { Button } from "../components/ui/Button";
+import { Badge } from "../components/ui/Badge";
 
 const Schemes = () => {
-  // UI/filters
-  const [selectedFilter, setSelectedFilter] = useState("");      // e.g. department
-  const [selectedCategories, setSelectedCategories] = useState([]); // e.g. crops or custom tags
-  const [stateFilter, setStateFilter] = useState("");
-  const [districtFilter, setDistrictFilter] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("");
   const [search, setSearch] = useState("");
-
-  // data + pagination
   const [schemes, setSchemes] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const limit = 9; // 3 columns * 3 rows
+  const limit = 9;
 
-  const toggleCategory = (category) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
-
-  // Build query object that matches your controller's buildFilters()
   const fetchSchemes = async () => {
     try {
       setLoading(true);
-
-      const query = {
-        page,
-        limit,
-      };
-
-      if (stateFilter) query.state = stateFilter;
-      if (districtFilter) query.district = districtFilter;
+      const query = { page, limit };
       if (selectedFilter) query.department = selectedFilter;
       if (search) query.search = search;
 
-      // Example: if you map selectedCategories → crops filter
-      if (selectedCategories.length > 0) {
-        // backend expects a single crop string; you can choose first or change controller
-        query.crop = selectedCategories[0];
-      }
-
       const res = await getJSON("/schemes", query);
-      // expecting { success, page, totalPages, results }
       setSchemes(res.results || res.data?.results || []);
       setTotalPages(res.totalPages || res.data?.totalPages || 1);
     } catch (err) {
@@ -64,127 +38,135 @@ const Schemes = () => {
 
   useEffect(() => {
     fetchSchemes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, stateFilter, districtFilter, selectedFilter, selectedCategories, search]);
-  
+  }, [page, selectedFilter, search]);
+
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" }); // or "smooth"
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <SchemeHeader
-        search={search}
-        setSearch={setSearch}
-        onSearchSubmit={() => setPage(1)}
-      />
-
-      <div className="flex">
-        {/* Sidebar - pass setters so it can update filters */}
-        <SchemeSidebar
-          selectedFilter={selectedFilter}
-          setSelectedFilter={(val) => {
-            setSelectedFilter(val);
-            setPage(1);
-          }}
-          toggleCategory={toggleCategory}
-          selectedCategories={selectedCategories}
-          stateFilter={stateFilter}
-          setStateFilter={(val) => {
-            setStateFilter(val);
-            setPage(1);
-          }}
-          districtFilter={districtFilter}
-          setDistrictFilter={(val) => {
-            setDistrictFilter(val);
-            setPage(1);
-          }}
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        <PageHeader
+          badge="Government Welfare"
+          badgeIcon={Landmark}
+          title="Government Agricultural Schemes"
+          subtitle="Explore Central and Kerala State subsidies, crop insurance, equipment grants, and loan subsidies."
         />
 
-        {/* Schemes Content */}
-        <main className="flex-1 p-6 md:p-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-green-700">
-              Available Government Schemes
-            </h2>
-            {loading && (
-              <span className="text-xs text-gray-500">Loading...</span>
-            )}
+        {/* Filters */}
+        <Card className="mb-8">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-2">
+                <Input
+                  type="text"
+                  placeholder="Search schemes by keyword or department..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  icon={Search}
+                />
+              </div>
+
+              <select
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-200/90 rounded-xl text-slate-900 text-xs outline-none cursor-pointer"
+                value={selectedFilter}
+                onChange={(e) => {
+                  setSelectedFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">All Departments</option>
+                <option value="Agriculture">Agriculture Department</option>
+                <option value="Horticulture">Horticulture Mission</option>
+                <option value="KeraFed">KeraFed / Coconut Development</option>
+                <option value="Fisheries">Fisheries & Animal Husbandry</option>
+              </select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Schemes Grid */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 text-slate-400 gap-2">
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+            <span className="text-xs font-semibold">Loading government schemes...</span>
           </div>
-
-          {schemes.length === 0 && !loading ? (
-            <p className="text-sm text-gray-500">
-              No schemes found. Try changing filters.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        ) : schemes.length === 0 ? (
+          <div className="text-center py-16 text-slate-400">
+            <Landmark className="h-12 w-12 mx-auto mb-2 text-slate-300" />
+            <p className="text-sm font-semibold text-slate-700">No schemes found matching criteria.</p>
+          </div>
+        ) : (
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {schemes.map((scheme) => (
-               <Link
-  to={`${scheme._id}`}
-  key={scheme._id}
-  className="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition flex flex-col h-full"
->
-  <div className="flex items-center gap-2 mb-2">
-    <BadgeCheck className="text-green-600" size={18} />
-    <h3 className="text-base md:text-lg font-semibold text-gray-900 line-clamp-2">
-      {scheme.name}
-    </h3>
-  </div>
+                <Card key={scheme._id} className="hover:border-emerald-300 flex flex-col justify-between">
+                  <CardContent className="p-6 flex flex-col justify-between h-full">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <BadgeCheck className="text-emerald-600 h-5 w-5 shrink-0" />
+                        <h3 className="font-extrabold text-sm text-slate-900 line-clamp-2">
+                          {scheme.name}
+                        </h3>
+                      </div>
 
-  <p className="text-xs md:text-sm text-gray-600 mb-1">
-    <span className="font-semibold">Department:</span> {scheme.department}
-  </p>
+                      <div className="mb-3">
+                        <Badge variant="emerald">{scheme.department || "Agricultural Dept"}</Badge>
+                      </div>
 
-  {scheme.eligibility?.state && (
-    <p className="text-xs md:text-sm text-gray-600 mb-1">
-      <span className="font-semibold">State:</span> {scheme.eligibility.state}
-    </p>
-  )}
+                      <p className="text-xs text-slate-600 line-clamp-3 mb-4 leading-relaxed">
+                        {scheme.description}
+                      </p>
+                    </div>
 
-  <p className="text-xs md:text-sm text-gray-700 mb-2 line-clamp-3">
-    {scheme.description}
-  </p>
+                    <div>
+                      {scheme.benefits && (
+                        <div className="bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-100 mb-4 text-xs font-bold text-emerald-800">
+                          Benefit: {scheme.benefits}
+                        </div>
+                      )}
 
-  {scheme.benefits && (
-    <p className="text-sm text-green-700 font-medium">
-      Benefit: {scheme.benefits}
-    </p>
-  )}
-
-  {/* Push the button to the bottom */}
-  <button className="mt-auto w-full bg-green-600 text-white py-2 rounded-lg text-sm hover:bg-green-700 transition">
-    View Details
-  </button>
-</Link>
-
+                      <Link to={`${scheme._id}`}>
+                        <Button variant="secondary" className="w-full">
+                          <span>View Scheme Details</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
-          )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-3 mt-6 text-sm">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="px-3 py-1.5 rounded border border-gray-300 text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                Prev
-              </button>
-              <span className="text-gray-600">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="px-3 py-1.5 rounded border border-gray-300 text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </main>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 mt-8">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Prev
+                </Button>
+                <span className="text-xs font-bold text-slate-700">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

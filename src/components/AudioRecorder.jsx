@@ -1,7 +1,7 @@
 import { Mic, MicOff } from "lucide-react";
 import { useState, useRef } from "react";
 
-export default function AudioRecorder({setMessage , setProcessing}) {
+export default function AudioRecorder({ setMessage, setProcessing }) {
     const [recording, setRecording] = useState(false);
     const [audioURL, setAudioURL] = useState(null);
     const mediaRecorderRef = useRef(null);
@@ -14,7 +14,7 @@ export default function AudioRecorder({setMessage , setProcessing}) {
 
             // Use fetch directly or adjust postJSON to handle FormData without JSON
             setProcessing(true);
-            const response = await fetch("http://localhost:5000/api/advisory/stt", {
+            const response = await fetch("https://krishi-backend-1-e2vy.onrender.com/api/advisory/stt", {
                 method: "POST",
                 body: formData,
             });
@@ -68,12 +68,12 @@ export default function AudioRecorder({setMessage , setProcessing}) {
     };
 
     return (
-         <button
-            onClick={recording?stopRecording: startRecording}
+        <button
+            onClick={recording ? stopRecording : startRecording}
             className={`p-2 rounded-lg ${recording ? "bg-red-600 text-white" : "bg-gray-200 text-gray-600"}`}
-          >
-            
+        >
+
             {recording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-          </button>
+        </button>
     );
 }

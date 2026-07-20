@@ -3,14 +3,20 @@ import {
   Upload as UploadIcon,
   Camera,
   FileImage,
-  CheckCircle,
-  AlertCircle,
-  Loader,
+  CheckCircle2,
+  Loader2,
+  AlertTriangle,
+  Microscope,
+  Sprout
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { isAuthenticated } from "../lib/actions/authActions";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import { Button } from "../components/ui/Button";
+import { Badge } from "../components/ui/Badge";
 
 const Upload = () => {
   const navigate = useNavigate();
@@ -56,7 +62,6 @@ const Upload = () => {
     }
   };
 
-  // 🔥 SEND IMAGE TO BACKEND
   const analyzeImage = async () => {
     if (!selectedFile) return;
 
@@ -75,7 +80,7 @@ const Upload = () => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5000/api/advisory/detect-crop-disease",
+        "https://krishi-backend-1-e2vy.onrender.com/api/advisory/detect-crop-disease",
         {
           method: "POST",
           headers: {
@@ -109,80 +114,69 @@ const Upload = () => {
   };
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat py-8 relative"
-      style={{
-        backgroundImage:
-          "url('https://cdn.pixabay.com/photo/2021/09/18/02/27/vietnam-6634082_1280.jpg')",
-      }}
-    >
-      <div className="absolute inset-0 bg-white/50 backdrop-blur-[3px]"></div>
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <PageHeader
+          badge="AI Diagnostics"
+          badgeIcon={Microscope}
+          title={t("cropDetection.title")}
+          subtitle={t("cropDetection.subtitle")}
+        />
 
-      <div className="relative z-10">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
-          {/* PAGE HEADING */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">{t("cropDetection.title")}</h1>
-            <p className="text-xl text-gray-600">{t("cropDetection.subtitle")}</p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-            {/* UPLOAD CARD */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold mb-4">{t("uploadImage.title")}</h2>
-
+          {/* UPLOAD CARD */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("uploadImage.title")}</CardTitle>
+            </CardHeader>
+            <CardContent>
               {!previewUrl ? (
                 <div
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-green-400"
+                  className="border-2 border-dashed border-emerald-300 rounded-xl p-8 text-center bg-emerald-50/30 hover:bg-emerald-50/60 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[220px]"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <UploadIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-lg font-medium text-gray-700">{t("uploadArea.dropOrClick")}</p>
-                  <p className="text-sm text-gray-500">{t("uploadArea.supports")}</p>
+                  <UploadIcon className="h-10 w-10 text-emerald-600 mb-3" />
+                  <p className="font-bold text-sm text-slate-800 mb-1">{t("uploadArea.dropOrClick")}</p>
+                  <p className="text-xs text-slate-500 mb-4">{t("uploadArea.supports")}</p>
 
-                  <div className="mt-4 flex justify-center space-x-4">
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center space-x-2">
+                  <div className="flex gap-2">
+                    <Button size="sm">
                       <Camera className="h-4 w-4" />
                       <span>{t("uploadButtons.takePhoto")}</span>
-                    </button>
-
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 border rounded-lg flex items-center space-x-2"
-                    >
+                    </Button>
+                    <Button size="sm" variant="secondary">
                       <FileImage className="h-4 w-4" />
                       <span>{t("uploadButtons.chooseFile")}</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col space-y-4">
-                  <div className="relative w-full rounded-lg overflow-hidden bg-gray-100">
-                    <img src={previewUrl} className="w-full max-h-80 object-contain" alt="preview" />
+                <div className="space-y-4">
+                  <div className="relative w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+                    <img src={previewUrl} className="w-full max-h-72 object-contain" alt="preview" />
                     <button
                       onClick={() => {
                         setPreviewUrl(null);
                         setSelectedFile(null);
                         setAnalysisResult(null);
                       }}
-                      className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full"
+                      className="absolute top-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold"
                     >
                       ×
                     </button>
                   </div>
 
-                  <button
+                  <Button
                     onClick={analyzeImage}
                     disabled={isAnalyzing}
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
+                    className="w-full"
                   >
                     {isAnalyzing ? (
                       <>
-                        <Loader className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                         <span>{t("analyzing")}</span>
                       </>
                     ) : (
@@ -191,7 +185,7 @@ const Upload = () => {
                         <span>{t("analyzeButton")}</span>
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -202,175 +196,104 @@ const Upload = () => {
                 className="hidden"
                 onChange={handleFileInputChange}
               />
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* RESULTS CARD */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold mb-4">{t("analysisResults.title")}</h2>
+          {/* RESULTS CARD */}
+          <Card className="min-h-[340px]">
+            <CardHeader>
+              <CardTitle>{t("analysisResults.title")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!analysisResult && !isAnalyzing && (
+                <div className="text-center py-12 text-slate-400">
+                  <FileImage className="h-12 w-12 text-slate-300 mx-auto mb-2" />
+                  <p className="text-xs font-medium">{t("analysisResults.empty")}</p>
+                </div>
+              )}
 
-              <div className="max-h-[70vh] overflow-auto">
+              {isAnalyzing && (
+                <div className="text-center py-12">
+                  <Loader2 className="h-10 w-10 text-emerald-600 animate-spin mx-auto mb-3" />
+                  <p className="text-xs font-semibold text-slate-700">{t("analysisProgress")}</p>
+                </div>
+              )}
 
-                {!analysisResult && !isAnalyzing && (
-                  <div className="text-center py-12">
-                    <FileImage className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">{t("analysisResults.empty")}</p>
-                  </div>
-                )}
+              {analysisResult && (
+                <div className="space-y-4 animate-fade-in">
 
-                {isAnalyzing && (
-                  <div className="text-center py-12">
-                    <Loader className="h-16 w-16 text-green-600 animate-spin mx-auto mb-4" />
-                    <p className="text-gray-600">{t("analysisProgress")}</p>
-                  </div>
-                )}
-
-                {analysisResult && (
-                  <div className="space-y-6">
-
-                    {/* --- DISEASE CARD --- */}
-                    <div className="border border-orange-200 bg-orange-50 p-5 rounded-xl shadow-sm">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-sm font-semibold text-orange-900">
-                            {t("analysisResults.diseaseDetected")}
-                          </h3>
-
-                          <p className="text-xl font-bold text-orange-900 mt-1">
-                            {analysisResult.disease}
-                          </p>
-
-                          <p className="text-orange-700 text-sm mt-1">
-                            Confidence: {analysisResult.confidence}% | Severity: {analysisResult.severity}
-                          </p>
-
-                          {/* NEW: DISEASE STAGE */}
-                          <p className="text-blue-700 text-sm font-medium mt-1">
-                            Stage: {analysisResult.stage || "Unknown"}
-                          </p>
-
-                          {/* Confidence bar */}
-                          <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              style={{ width: `${analysisResult.confidence}%` }}
-                              className="h-2 bg-green-500 rounded-full"
-                            ></div>
-                          </div>
-
-                          {/* Per-acre dose */}
-                          {analysisResult.quantityPerUnit &&
-                            analysisResult.quantityPerUnit.trim() !== "" && (
-                              <>
-                                <p className="mt-4 text-sm font-semibold text-gray-700">
-                                  Dose (per acre):
-                                </p>
-                                <p className="text-sm text-gray-800">
-                                  {analysisResult.quantityPerUnit}
-                                </p>
-
-                                {analysisResult._personalization?.usedFallback && (
-                                  <div className="mt-2 text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 inline-block">
-                                    Estimated fallback dose used
-                                  </div>
-                                )}
-                              </>
-                            )}
-
-                          {/* Quantity Description */}
-                          {analysisResult.Quantity && (
-                            <p className="mt-3 text-xs text-gray-700">
-                              <strong>Details:</strong> {analysisResult.Quantity}
-                            </p>
-                          )}
-
-                          {/* Note */}
-                          {analysisResult.note && (
-                            <p className="mt-2 text-xs italic text-gray-500">{analysisResult.note}</p>
-                          )}
+                  {/* Disease Details Card */}
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800">{t("analysisResults.diseaseDetected")}</span>
+                        <h3 className="text-lg font-extrabold text-amber-950 mt-0.5">{analysisResult.disease}</h3>
+                        <div className="flex items-center gap-2 mt-1 text-xs font-semibold text-amber-900">
+                          <span>Confidence: {analysisResult.confidence}%</span>
+                          <span>•</span>
+                          <span>Severity: {analysisResult.severity}</span>
                         </div>
-
-                        {/* Total Quantity */}
-                        {analysisResult.totalQuantity &&
-                          analysisResult.totalQuantity.trim() !== "" && (
-                            <div className="text-right">
-                              <div className="bg-white border border-orange-100 px-3 py-2 rounded-full shadow">
-                                <p className="text-xs text-gray-500">Total for your land</p>
-                                <p className="font-bold text-sm">
-                                  {analysisResult.totalQuantity}
-                                </p>
-                              </div>
-                            </div>
-                          )}
                       </div>
-                    </div>
-
-                    {/* TREATMENT */}
-                    <div className="bg-white border rounded-xl p-5 shadow-sm">
-                      <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        {t("analysisResults.treatmentRecommendations")}
-                      </h3>
-
-                      {analysisResult.treatment?.length ? (
-                        <ul className="space-y-2">
-                          {analysisResult.treatment.map((step, idx) => (
-                            <li key={idx} className="flex items-start gap-3">
-                              <div className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">
-                                {idx + 1}
-                              </div>
-                              <p className="text-sm text-gray-700">{step}</p>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-gray-500">No treatment available.</p>
+                      {analysisResult.totalQuantity && (
+                        <Badge variant="emerald" className="bg-white text-emerald-800">
+                          Total: {analysisResult.totalQuantity}
+                        </Badge>
                       )}
                     </div>
 
-                    {/* PREVENTION */}
-                    <div className="bg-white border rounded-xl p-5 shadow-sm">
-                      <h3 className="font-semibold text-gray-900 mb-3">
-                        {t("analysisResults.preventionTips")}
-                      </h3>
-
-                      {analysisResult.prevention?.length ? (
-                        <ul className="space-y-2">
-                          {analysisResult.prevention.map((tip, idx) => (
-                            <li key={idx} className="flex gap-3">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
-                              <p className="text-sm text-gray-700">{tip}</p>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-gray-500">No prevention available.</p>
-                      )}
+                    <div className="mt-3 w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        style={{ width: `${analysisResult.confidence}%` }}
+                        className="h-full bg-emerald-600 rounded-full"
+                      ></div>
                     </div>
-
-                    {/* FERTILIZERS */}
-                    <div className="bg-white border rounded-xl p-5 shadow-sm">
-                      <h3 className="font-semibold text-gray-900 mb-3">Recommended Fertilizers</h3>
-
-                      {analysisResult.Fertilizers?.length ? (
-                        <ul className="space-y-2">
-                          {analysisResult.Fertilizers.map((f, idx) => (
-                            <li key={idx} className="flex gap-3">
-                              <div className="w-2 h-2 bg-purple-500 rounded-full mt-2" />
-                              <p className="text-sm text-gray-700">{f}</p>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-gray-500">No fertilizer recommendations.</p>
-                      )}
-                    </div>
-
                   </div>
-                )}
 
-              </div>
-            </div>
+                  {/* Treatments */}
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2 flex items-center gap-1.5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      <span>{t("analysisResults.treatmentRecommendations")}</span>
+                    </h4>
+                    <ul className="space-y-1 text-xs text-slate-700">
+                      {analysisResult.treatment?.length ? (
+                        analysisResult.treatment.map((step, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full mt-0.5">
+                              {idx + 1}
+                            </span>
+                            <span>{step}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-xs text-slate-400">No treatment steps found.</li>
+                      )}
+                    </ul>
+                  </div>
 
-          </div>
+                  {/* Fertilizers */}
+                  {analysisResult.Fertilizers?.length > 0 && (
+                    <div className="pt-2 border-t border-slate-100">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2 flex items-center gap-1.5">
+                        <Sprout className="h-4 w-4 text-emerald-600" />
+                        <span>Recommended Fertilizers</span>
+                      </h4>
+                      <ul className="space-y-1 text-xs text-slate-700">
+                        {analysisResult.Fertilizers.map((f, idx) => (
+                          <li key={idx} className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
         </div>
       </div>
     </div>

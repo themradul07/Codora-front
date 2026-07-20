@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Award, FileText } from "lucide-react";
+import { Award, FileText, Loader2, AlertTriangle, Sparkles } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../lib/actions/authActions";
@@ -45,20 +45,9 @@ const Dashboard = () => {
     }
   };
 
-  // AI Crop Tips
-  // const getTips = async () => {
-  //   try {
-  //     const tips = await postJSON("/advisory/generate-advisory", {});
-  //     setCropTips(tips?.advisories || []);
-  //   } catch (err) {
-  //     console.error("AI Tips error:", err);
-  //   }
-  // };
-
-  // Weather Fetsch
+  // Weather Fetch
   const loadWeather = async () => {
     try {
-      const key = import.meta.env.VITE_WEATHER_API_KEY;
       const url = `https://api.weatherapi.com/v1/forecast.json?key=748c922b6b124c14ad305356252111&q=Kerala&days=4&aqi=no&alerts=no`;
 
       const response = await fetch(url);
@@ -74,7 +63,7 @@ const Dashboard = () => {
       setWeather(data);
     } catch (error) {
       console.log("Weather error:", error);
-    } finally {
+    } fontally: {
       setLoadingWeather(false);
     }
   };
@@ -89,50 +78,59 @@ const Dashboard = () => {
       return;
     }
 
-    // getTips();
     fetchData();
     loadWeather();
   }, []);
 
   if (loadingWeather) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-green-50">
-        <p className="text-gray-600">{t("loadingWeather")}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3">
+        <Loader2 className="h-10 w-10 text-emerald-600 animate-spin" />
+        <p className="text-slate-600 font-medium text-sm animate-pulse">{t("loadingWeather")}</p>
       </div>
     );
   }
 
   if (!weather) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-green-50">
-        <p className="text-red-500">{t("weatherFailed")}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3">
+        <AlertTriangle className="h-10 w-10 text-amber-500" />
+        <p className="text-rose-500 font-semibold">{t("weatherFailed")}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-green-50 pb-8">
-      {/* TITLE */}
+    <div className="min-h-screen bg-slate-50/70 pb-12">
+      {/* Dashboard Banner */}
       <div
-        className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between min-h-96 gap-3 overflow-hidden shadow relative bg-cover bg-center"
+        className="mb-10 flex flex-col items-center justify-center min-h-[280px] sm:min-h-[320px] gap-4 overflow-hidden shadow-lg relative bg-cover bg-center border-b border-emerald-100"
         style={{ backgroundImage: "url(/bg10.jpg)" }}
       >
-        <div className="absolute inset-0 bg-black/30"></div>
+        {/* Dark Glass Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-emerald-950/80 to-slate-950/85 backdrop-blur-[2px]"></div>
 
-        <div className="relative flex flex-col gap-8 w-full text-center py-8 px-6">
-          <h1 className="text-3xl font-bold text-white drop-shadow-lg">
+        <div className="relative z-10 flex flex-col items-center gap-4 w-full text-center py-10 px-6 max-w-4xl mx-auto animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-400/30 text-emerald-300 text-xs font-semibold uppercase tracking-wider">
+            <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+            <span>Smart Advisory Hub</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight drop-shadow-md">
             {t("farmerDashboard")}
           </h1>
 
-          <p className="text-sm text-white drop-shadow">
+          <p className="text-sm sm:text-base text-emerald-100/90 max-w-xl drop-shadow font-medium">
             {t("dashboardSubtitle")}
           </p>
 
-          <AddActivity />
+          <div className="mt-2">
+            <AddActivity />
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* LEFT */}
           <div className="lg:col-span-2 space-y-8">
@@ -141,14 +139,15 @@ const Dashboard = () => {
 
           {/* RIGHT */}
           <div className="space-y-8 mb-8">
-            {/* TODAY PLANNER */}
-            
             <CropCalendar/>
           </div>
         </div>
+
+        <div className="mt-10">
+          <Grid />
+        </div>
       </div>
 
-      <Grid />
     </div>
   );
 };

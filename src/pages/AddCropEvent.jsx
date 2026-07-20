@@ -1,10 +1,13 @@
-// pages/AddCropEvent.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Sprout, FileText, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { getJSON, postJSON } from "../api";
 import { toast } from "react-toastify";
 import { useLanguage } from "../contexts/LanguageContext";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
+import { Button } from "../components/ui/Button";
 
 const AddCropEvent = () => {
   const navigate = useNavigate();
@@ -24,14 +27,12 @@ const AddCropEvent = () => {
   const [plotsLoading, setPlotsLoading] = useState(true);
   const [plotsError, setPlotsError] = useState("");
 
-  // Fetch plots on mount
   useEffect(() => {
     const fetchPlots = async () => {
       try {
         setPlotsLoading(true);
         setPlotsError("");
         const res = await getJSON("/tasks/plots");
-        // if backend returns an object with .plots use res.plots, else assume res is array
         setPlots(Array.isArray(res) ? res : res?.plots ?? []);
       } catch (err) {
         console.error("Error loading plots", err);
@@ -42,7 +43,6 @@ const AddCropEvent = () => {
     };
 
     fetchPlots();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (e) => {
@@ -63,7 +63,7 @@ const AddCropEvent = () => {
     try {
       setLoading(true);
       const res = await postJSON("/tasks/add", formData);
-      if (res?.success) {
+      if (res) {
         toast.success(t("addedSuccess"));
         navigate("/dashboard");
       } else {
@@ -78,171 +78,131 @@ const AddCropEvent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4fff8]">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-10">
-        {/* back + page title strip */}
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-emerald-800 hover:text-emerald-900"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t("backToCalendar")}
-        </button>
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <PageHeader
+          badge="Crop Calendar"
+          badgeIcon={Calendar}
+          title={t("addNewCropEvent")}
+          subtitle={t("scheduleUpcomingTasks")}
+        />
 
-        {/* main card */}
-        <div className="bg-white rounded-2xl shadow-md border border-emerald-100 p-6 md:p-8">
-          {/* header row */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-emerald-500 text-white">
-                <Calendar className="w-5 h-5" />
-              </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Event Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <h1 className="text-xl md:text-2xl font-semibold text-emerald-900">
-                  {t("addNewCropEvent")}
-                </h1>
-                <p className="text-sm text-emerald-600">
-                  {t("scheduleUpcomingTasks")}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* form body */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                {t("eventTitle")} <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder={t("eventTitlePlaceholder")}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* due date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("dueDateLabel")} <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  {t("eventTitle")} *
                 </label>
-                <input
-                  type="date"
-                  name="dueDate"
-                  value={formData.dueDate}
+                <Input
+                  type="text"
+                  name="title"
+                  value={formData.title}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder={t("eventTitlePlaceholder")}
                 />
               </div>
 
-              {/* plot select from backend */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                  <Sprout className="w-4 h-4 text-emerald-500" />
-                  {t("plotFieldLabel")}
-                </label>
-
-                {plotsLoading ? (
-                  <div className="text-xs text-gray-500 py-2">
-                    {t("loadingPlots")}
-                  </div>
-                ) : (
-                  <select
-                    name="plotId"
-                    value={formData.plotId}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    {t("dueDateLabel")} *
+                  </label>
+                  <Input
+                    type="date"
+                    name="dueDate"
+                    value={formData.dueDate}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
-                  >
-                    <option value="">{t("selectPlot")}</option>
-                    {plots.map((plot) => {
-                      const key = plot.id ?? plot._id ?? plot.name;
-                      const value = plot._id ?? plot.id ?? plot.name;
-                      const label = plot.farmName ?? plot.name ?? plot.farm ?? value;
-                      return (
-                        <option key={key} value={value}>
-                          {label}
-                        </option>
-                      );
-                    })}
-                  </select>
-                )}
+                    required
+                  />
+                </div>
 
-                {plotsError && (
-                  <p className="mt-1 text-xs text-red-500">{plotsError}</p>
-                )}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    {t("plotFieldLabel")}
+                  </label>
+                  {plotsLoading ? (
+                    <p className="text-xs text-slate-400 py-2">{t("loadingPlots")}</p>
+                  ) : (
+                    <select
+                      name="plotId"
+                      value={formData.plotId}
+                      onChange={handleChange}
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200/90 rounded-xl text-slate-900 text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
+                    >
+                      <option value="">{t("selectPlot")}</option>
+                      {plots.map((plot) => {
+                        const key = plot.id ?? plot._id ?? plot.name;
+                        const value = plot._id ?? plot.id ?? plot.name;
+                        const label = plot.farmName ?? plot.name ?? plot.farm ?? value;
+                        return (
+                          <option key={key} value={value}>
+                            {label}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  )}
+                  {plotsError && <p className="mt-1 text-xs text-rose-600">{plotsError}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    {t("typeLabel")}
+                  </label>
+                  <Input
+                    type="text"
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                    placeholder={t("typePlaceholder")}
+                  />
+                </div>
               </div>
 
-              {/* type */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                  <Sprout className="w-4 h-4 text-emerald-500" />
-                  {t("typeLabel")}
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  {t("adviceNotesLabel")}
                 </label>
-                <input
-                  type="text"
-                  name="type"
-                  value={formData.type}
+                <textarea
+                  name="advice"
+                  value={formData.advice}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder={t("typePlaceholder")}
+                  rows={3}
+                  className="w-full border border-slate-200/90 rounded-xl p-3 text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-slate-900"
+                  placeholder={t("advicePlaceholder")}
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                <FileText className="w-4 h-4 text-emerald-500" />
-                {t("adviceNotesLabel")}
-              </label>
-              <textarea
-                name="advice"
-                value={formData.advice}
-                onChange={handleChange}
-                rows={3}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
-                placeholder={t("advicePlaceholder")}
-              />
-            </div>
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  id="completed"
+                  type="checkbox"
+                  name="isCompleted"
+                  checked={formData.isCompleted}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 cursor-pointer"
+                />
+                <label htmlFor="completed" className="text-xs font-medium text-slate-700 cursor-pointer">
+                  {t("markAsCompleted")}
+                </label>
+              </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                id="completed"
-                type="checkbox"
-                name="isCompleted"
-                checked={formData.isCompleted}
-                onChange={handleChange}
-                className="h-4 w-4 text-emerald-600 border-2 border-emerald-300 rounded"
-              />
-              <label htmlFor="completed" className="text-sm text-gray-700">
-                {t("markAsCompleted")}
-              </label>
-            </div>
-
-            <div className="flex justify-end pt-2 gap-3">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                {t("cancel")}
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-5 py-2 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
-              >
-                {loading ? t("saving") : t("saveEvent")}
-              </button>
-            </div>
-          </form>
-        </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
+                  {t("cancel")}
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? t("saving") : t("saveEvent")}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

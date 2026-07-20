@@ -3,6 +3,10 @@ import { postJSON } from "../api";
 import { Sprout, CalendarDays, Leaf, LandPlot } from "lucide-react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { PageHeader } from "./ui/PageHeader";
+import { Card, CardHeader, CardTitle, CardContent } from "./ui/Card";
+import { Input } from "./ui/Input";
+import { Button } from "./ui/Button";
 
 export default function AddCropForm() {
   const navigate = useNavigate();
@@ -14,7 +18,6 @@ export default function AddCropForm() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,129 +26,111 @@ export default function AddCropForm() {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
 
     try {
       const res = await postJSON("/farmer/add-crop", form);
       console.log(res);
-      setMessage("🌾 Crop added successfully! Calendar generated.");
-      navigate("/farms");
       toast.success("🌾 Crop added successfully! Calendar generated.");
-
+      navigate("/farms");
     } catch (err) {
       console.error(err);
-      setMessage("❌ Failed to add crop.");
+      toast.error("Failed to add crop.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center p-6"
-      style={{
-        backgroundImage:
-          "url('/bgAddCrop.jpg')",
-      }}
-    >
-      {/* Overlay */}
-      {/* <div className="absolute inset-0 bg-black/40" /> */}
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-xl mx-auto">
+        <PageHeader
+          badge="Land Management"
+          badgeIcon={LandPlot}
+          title="Add New Farm Plot"
+          subtitle="Register a new crop field, variety, and sowing date to automatically initialize your AI crop calendar."
+        />
 
-      {/* Form container */}
-      <div className="relative w-full max-w-md bg-yellow/20 backdrop-blur-xl p-8 shadow-2xl rounded-2xl border border-white/30">
-        <h2 className="text-3xl font-bold text-white text-center mb-6 flex items-center justify-center gap-2">
-          <Leaf className="text-green-300" /> Add New Crop
-        </h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Plot Registration</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Farm / Plot Name *
+                </label>
+                <Input
+                  name="farmName"
+                  value={form.farmName}
+                  onChange={handleChange}
+                  placeholder="E.g. North Field Paddy, Plot B"
+                  icon={LandPlot}
+                  required
+                />
+              </div>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Select Crop Category *
+                </label>
+                <select
+                  name="cropName"
+                  value={form.cropName}
+                  onChange={handleChange}
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200/90 rounded-xl text-slate-900 text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
+                  required
+                >
+                  <option value="">Select a crop type</option>
+                  <option value="Paddy">Paddy (90 days)</option>
+                  <option value="Banana">Banana (240 days)</option>
+                  <option value="Coconut">Coconut</option>
+                  <option value="Pepper">Pepper (210 days)</option>
+                  <option value="Rubber">Rubber</option>
+                  <option value="Tapioca">Tapioca (240 days)</option>
+                  <option value="Ginger">Ginger (210 days)</option>
+                  <option value="Turmeric">Turmeric (270 days)</option>
+                  <option value="Vegetables_Mixed">Vegetables Mixed (40 days)</option>
+                  <option value="Cashew">Cashew (150 days)</option>
+                  <option value="Arecanut">Arecanut (180 days)</option>
+                </select>
+              </div>
 
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Crop Variety
+                </label>
+                <Input
+                  name="variety"
+                  value={form.variety}
+                  onChange={handleChange}
+                  placeholder="E.g. Jyothi, Robusta, Nendran"
+                  icon={Sprout}
+                />
+              </div>
 
-          <div>
-            <label className="font-medium text-white">Farm Name</label>
-            <div className="flex items-center bg-white/80 rounded-lg p-2 mt-1 shadow-sm">
-              <LandPlot className="text-green-700 mr-2" />
-              <input
-                name="farmName"
-                value={form.farmName}
-                onChange={handleChange}
-                placeholder="E.g. Paddy, Banana, Brinjal"
-                className="w-full p-2 bg-transparent outline-none"
-                required
-              />
-            </div>
-          </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Sowing / Planting Date *
+                </label>
+                <Input
+                  type="date"
+                  name="sowingDate"
+                  value={form.sowingDate}
+                  onChange={handleChange}
+                  icon={CalendarDays}
+                  required
+                />
+              </div>
 
-          <div>
-            <label className="font-medium text-white">Crop Name</label>
-            <div className="flex items-center bg-white/80 rounded-lg p-2 mt-1 shadow-sm">
-              <Sprout className="text-green-700 mr-2" />
-              <select
-                name="cropName"
-                value={form.cropName}
-                onChange={handleChange}
-                className="w-full p-2 bg-transparent outline-none text-gray-800"
-                required
-              >
-                <option value="">Select a crop</option>
-                <option value="Paddy">Paddy (90 days)</option>
-                <option value="Banana">Banana (240 days)</option>
-                <option value="Coconut">Coconut</option>
-                <option value="Pepper">Pepper (210 days)</option>
-                <option value="Rubber">Rubber</option>
-                <option value="Tapioca">Tapioca (240 days)</option>
-                <option value="Ginger">Ginger (210 days)</option>
-                <option value="Turmeric">Turmeric (270 days)</option>
-                <option value="Vegetables_Mixed">Vegetables Mixed (40 days)</option>
-                <option value="Cashew">Cashew (150 days)</option>
-                <option value="Arecanut">Arecanut (180 days)</option>
-              </select>
-            </div>
-          </div>
-
-
-          <div>
-            <label className="font-medium text-white">Variety</label>
-            <div className="flex items-center bg-white/80 rounded-lg p-2 mt-1 shadow-sm">
-              <Leaf className="text-green-700 mr-2" />
-              <input
-                name="variety"
-                value={form.variety}
-                onChange={handleChange}
-                placeholder="E.g. Jyothi, Robusta"
-                className="w-full p-2 bg-transparent outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="font-medium text-white">Sowing Date</label>
-            <div className="flex items-center bg-white/80 rounded-lg p-2 mt-1 shadow-sm">
-              <CalendarDays className="text-green-700 mr-2" />
-              <input
-                type="date"
-                name="sowingDate"
-                value={form.sowingDate}
-                onChange={handleChange}
-                className="w-full p-2 bg-transparent outline-none"
-                required
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold shadow-lg transition transform hover:scale-[1.02]"
-          >
-            {loading ? "Saving..." : "Add Crop"}
-          </button>
-        </form>
-
-        {message && (
-          <p className="mt-5 text-center font-medium text-white text-lg drop-shadow-md">
-            {message}
-          </p>
-        )}
+              <div className="pt-2">
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading ? "Registering Farm Plot..." : "Add Farm Plot"}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
