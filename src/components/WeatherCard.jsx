@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getWeatherData, reverseGeoLookup } from "../lib/actions/weather";
+
 import {
   Cloud,
   Thermometer,
@@ -8,7 +10,7 @@ import {
   Search,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import { getWeatherData } from "../lib/actions/weather";
+
 import { useLanguage } from "../contexts/LanguageContext";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -16,6 +18,7 @@ import { Input } from "./ui/Input";
 const WeatherCard = ({ Weather, setWeather }) => {
   const { t } = useLanguage();
   const [location, setLocation] = useState("");
+  const [recommendations, setRecommendations] = useState([]);
 
   const searchLocation = async (loc) => {
     if (!loc.trim()) return;
@@ -149,6 +152,19 @@ const WeatherCard = ({ Weather, setWeather }) => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Farmer Recommendations */}
+      <div className="mt-6 bg-green-50 border border-green-200 rounded-xl p-5 shadow-sm">
+        <h3 className="text-xl font-semibold text-green-700 flex items-center gap-2">
+          🌾 Farmer’s Recommendation
+        </h3>
+
+        <ul className="mt-3 text-gray-700 space-y-2">
+          {recommendations.map((tip, index) => (
+            <li key={index}>• {tip}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );
