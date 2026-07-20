@@ -141,7 +141,7 @@ const ChatbotPanel = () => {
   return (
     <div className="w-80 sm:w-96 h-[30rem] bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
       {/* Header */}
-<<<<<<< HEAD
+
       <div className="px-4 py-3 border-b border-slate-100 bg-slate-900 text-white flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="p-1.5 rounded-lg bg-emerald-600">
@@ -152,11 +152,6 @@ const ChatbotPanel = () => {
             <p className="text-[10px] text-slate-300">24/7 Kerala Agri Advisory</p>
           </div>
         </div>
-=======
-      <div className="px-4 py-3 border-b bg-green-600 text-white">
-        <h2 className="font-semibold text-sm">{t("AgriSmart Chat")}</h2>
-        <p className="text-xs opacity-80">{t("The Farmer’s AI Friend")}</p>
->>>>>>> 92b1f63d0f533fb39cbd54152911f962a481b15b
       </div>
 
       {/* Messages */}
